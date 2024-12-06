@@ -1,6 +1,4 @@
-﻿using System; //네임스페이스 전체를 사용한다.
-using static System.Console; 
-//어떤 데이터 형식의 정적 멤버를 데이터 형식이 이름을 명시하지 않고 참조하겠다.
+﻿using System; //네임스페이스 전체를 사용한다. System.Console.WriteLine() -> Console.WriteLine()
 
 namespace Hello //비슷한 것들끼리 하나의 이름 아래 묶음.
 {
@@ -12,8 +10,7 @@ namespace Hello //비슷한 것들끼리 하나의 이름 아래 묶음.
          //static은 한정자. 메소드나 변수 등을 수식.
          // static 키워드로 수식되는 코드는 프로그램이 처음 구동될 때부터 메모리에 할당된다. 
         {
-            WriteLine("여러분, 안녕하세요?"); // 프롬프트에 출력
-            WriteLine("반갑습니다!");
+            Console.WriteLine("Hello World!"); // 프롬프트에 출력
         }
     }
 }
