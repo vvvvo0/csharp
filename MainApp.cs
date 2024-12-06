@@ -11,14 +11,26 @@ namespace Hello //비슷한 것들끼리 하나의 이름 아래 묶음.
          // static 키워드로 수식되는 코드는 프로그램이 처음 구동될 때부터 메모리에 할당된다. 
         {
             Console.WriteLine("Hello World!"); // 프롬프트에 출력
-            
 
-         //논리 형식
-            bool a = true;
-            bool b = false;
 
+            //Object 형식
+            int a = 123; //값 형식 -> 따라서 스택에 저장.
+            object b = (object)a; //참조 형식 -> 따라서 object 형식은 a에 담긴 값을 박싱해서 힙에 저장.
+            int c =(int)b; //b에 담긴 값을 언박싱해서 스택에 저장.
+                           //(int)는 변수를 Int 형식(값 형식)으로 변환하는 연산자. -> 따라서 스택에 저장.
+
+        
             Console.WriteLine(a);
             Console.WriteLine(b);
+            Console.WriteLine(c);
+            double x = 3.1414213;
+            object y = x; //x에 담긴 값을 박싱해서 힙에 저장.
+            double z= (double)y; //y에 담긴 값을 언박싱해서 스택에 저장.
+
+            Console.WriteLine(x);
+            Console.WriteLine(z);
+            Console.WriteLine(y);
+         
         }
     }
 }
