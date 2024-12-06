@@ -11,6 +11,14 @@ namespace Hello //비슷한 것들끼리 하나의 이름 아래 묶음.
          // static 키워드로 수식되는 코드는 프로그램이 처음 구동될 때부터 메모리에 할당된다. 
         {
             Console.WriteLine("Hello World!"); // 프롬프트에 출력
+            
+
+         //논리 형식
+            bool a = true;
+            bool b = false;
+
+            Console.WriteLine(a);
+            Console.WriteLine(b);
         }
     }
 }
