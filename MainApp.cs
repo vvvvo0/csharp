@@ -10,23 +10,28 @@ namespace Hello //비슷한 것들끼리 하나의 이름 아래 묶음.
          //static은 한정자. 메소드나 변수 등을 수식.
          // static 키워드로 수식되는 코드는 프로그램이 처음 구동될 때부터 메모리에 할당된다. 
         {
-            Console.Write("숫자를 입력하세요. :");
+            Console.Write("요일을 입력하세요(일, 월, 화) :");
 
-            string input=Console.ReadLine();
-            int number = Convert.ToInt32(input);
+            string day = Console.ReadLine(); // c의 scanf와 비슷
 
-            if (number > 0)
+            switch (day)
             {
-                if (number % 2 == 0)
-                    Console.WriteLine("0보다 큰 짝수.");
-                else
-                    Console.WriteLine("0보다 큰 홀수.");
-            }
-            else
-            {
-                Console.WriteLine("0보다 작거나 같은 수.");
+                case "일":
+                    Console.WriteLine("Sundat");
+                    break;
+                case "월":
+                    Console.WriteLine("Monday");
+                    break;
+                case "화":
+                    Console.WriteLine("Tuesday");
+                    break;
+
+
+
+
 
             }
+            
         }
     }
 }
