@@ -8,10 +8,17 @@ namespace Hello
         {
             int i = 10;
 
-            while(i>0) 
+            do
             {
-                Console.WriteLine($"i : {i--}");
+                Console.WriteLine("i(1) : {0}", i--);
             }
+
+            while (i > 0);
+            do
+            {
+                Console.WriteLine("i(2) : {0}", i--);
+            }
+            while (i > 0);
         }
     }
 }
