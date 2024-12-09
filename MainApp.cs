@@ -6,13 +6,12 @@ namespace Hello
     {
         static void Main(string[] args)  
         {
-            for (int i = 1; i <= 5; i++)  // i는 1부터 5까지 증가
+            int[] numbers = { 0, 1, 2, 3, 4 }; // 0부터 4까지의 값을 가진 배열 선언
+
+
+            foreach (int a in numbers) // numbers 배열의 각 요소를 a에 할당하며 반복
             {
-                for (int j = 1; j <= i; j++)  // j는 1부터 i까지 증가
-                {
-                    Console.Write("*");
-                }
-                Console.WriteLine();  // 줄 바꿈
+                Console.WriteLine(a); // a 값 출력
             }
         }
     }
