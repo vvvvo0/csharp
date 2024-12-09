@@ -6,19 +6,14 @@ namespace Hello
     {
         static void Main(string[] args)  
         {
-            int i = 10;
-
-            do
+            for (int i = 1; i <= 5; i++)  // i는 1부터 5까지 증가
             {
-                Console.WriteLine("i(1) : {0}", i--);
+                for (int j = 1; j <= i; j++)  // j는 1부터 i까지 증가
+                {
+                    Console.Write("*");
+                }
+                Console.WriteLine();  // 줄 바꿈
             }
-
-            while (i > 0);
-            do
-            {
-                Console.WriteLine("i(2) : {0}", i--);
-            }
-            while (i > 0);
         }
     }
 }
