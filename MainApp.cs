@@ -4,7 +4,7 @@ namespace Hello
 {
     class MainApp
     {
-        public static void Swap(int a, int b) //swap 메소드 구현
+        public static void Swap(ref int a, ref int b) //ref 키워드를 매개변수 앞에 붙여줌
         {
             int temp = b;
             b = a;
@@ -19,15 +19,11 @@ namespace Hello
 
             Console.WriteLine($"x:{x}, y:{y}");
 
-            Swap(x, y);
+            Swap(ref x, ref y); //메소드를 호출할 때 다시 ref 키워드를 붙여줌
 
             Console.WriteLine($"x:{x}, y:{y}");
         }
-        //a는 x가 가진 것과 똑같은 데이터를 갖고 있지만, a와 x는 완전히 별개의 메모리 공간을 사용함
-        //따라서 a를 수정해도 x는 영향을 받지 않음
-
-        //메소드가 매개변수를 받아들일 때는 데이터의 '복사'가 이루어짐
-        //메소드를 호출할 때 데이터를 복사해서 매개변수에 넘기는 것을 '값에 의한 전달'이라고 함
-
+        //매개변수가 메소드에 넘겨진 원본 변수를 직접 참조함
+        //따라서 메소드 안에서 매개변수를 수정하면 매개변수가 참조하고 있는 원본 변수에 수정이 이루어짐
     }
 }
