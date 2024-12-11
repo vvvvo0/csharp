@@ -4,26 +4,43 @@ namespace Hello
 {
     class Mainapp
     {
-        static void Divide(int a, int b, out int quotient, out int remainder) //메소드 선언부에 ref 키워드 대신 out 키워드 사용
+        static int Plus(int a, int b)
         {
-            quotient = a / b;
-            remainder = a % b;
+            Console.WriteLine("Calling int Plus(int,int)...");
+            return a + b;
         }
+
+        static int Plus(int a, int b, int c)
+        {
+            Console.WriteLine("Calling int Plus(int,int,int)...");
+            return a + b + c;
+        }
+
+        static double Plus(double a, double b)
+        {
+            Console.WriteLine("Calling double Plus(double,double)...");
+            return a + b;
+        }
+
+        static double Plus(int a, double b)
+        {
+            Console.WriteLine("Calling double Plus(int, double)...");
+            return a + b;
+        }
+
         static void Main(string[] args)
         {
-            int a= 20;
-            int b = 3;
-            // int c;
-            // int d;
-
-            Divide(a, b, out int c, out int d); // 메소드 호출부에 ref 키워드 대신 out 키워드 사용
-
-            Console.WriteLine($"a: {a}, b: {b}, a/b: {c}, a%b:{d}");
-
+            Console.WriteLine(Plus(1, 2));
+            Console.WriteLine(Plus(1, 2, 3));
+            Console.WriteLine(Plus(1.0, 2.4));
+            Console.WriteLine(Plus(1, 2.4));
         }
     }
 }
 
-// out에는 ref에 없는 안전장치 존재.
-//out 키워드를 이용하여 매개변수를 넘길 떄는 메소드가 해당 매개변수에 결과를 저장하지 않으면 컴파일러가 
-//에러 메시지를 출력해줌.
+// 하나의 메소드 이름에 여러 개의 구현을 올리는 것.
+//오버로딩을 해 놓으면 컴파일러가 메소드 호출 코드에 사용되는 매개변수의 수와 형식을 분석해서
+//어떤 버전이 호출될지를 찾아줌.
+
+//실행할 메소드의 버전을 찾는 작업은 컴파일 타임에 이루어지므로 성능 저하 X.
+//이름에 대한 고민을 줄여줌. 코드를 일관성 있게 유지해줌.
