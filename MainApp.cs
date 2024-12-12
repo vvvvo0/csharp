@@ -1,33 +1,38 @@
 ﻿using System;
 
-namespace This
+namespace ThisConstructor
 {
-    class Employee
+    class MyClass
     {
-        private string Name; // Employee 클래스의 필드 Name
-        private string Position;
+        int a, b, c; // int 형식의 필드 a, b, c
 
-        public void SetName(string Name) // 매개변수 Name
+        public MyClass() // 생성자 MyClass() : 매개변수를 입력받아 필드를 원하는 값으로 초기화
         {
-            this.Name = Name; // this.Name은 Employee 자신의 필드. Name은 메소드의 매개변수.
-                              // 이처럼 this 키워드를 활용하면 모호성을 풀 수 있음.
-                              // this 키워드: 객체 내부에서 자신의 필드나 메소드에 접근할 때 사용.
-                              // (객체 외부에서 객체의 필드나 메소드에 접근할 때는 객체의 이름(변수)를 사용)
+            this.a = 5425;
+            Console.WriteLine("MyClass()");
         }
 
-        public string GetName()
+        public MyClass(int b) : this() // this()는 자기 자신의 생성자를 가리킴.
+                                       // 생성자에서만 사용 가능. 얘처럼 생성자의 코드 블록 앞쪽에서만.
+                                       // this()는 MyClass()를 호출함.
+                                       // 이렇게 하는 이유는 a를 초기화 하려고 MyClass()를 호출해서 처리시킬 수 없는데, 
+                                       // 왜냐하면 원래는 new 연산자 없이 생성자를 호출할 수는 없기 때문.
+                                       // new 연산자를 쓰게 되면 해당 객체 외에 또 다른 객체를 만들어야 함.
+                                       // 이럴때 this()를 쓰면 자기 자신의 생성자를 가리키니까 new 연산자 안쓰고 해결 가능.
         {
-            return Name;
+            this.b = b;
+            Console.WriteLine($"MyClass({b})");
         }
 
-        public void SetPosition(string Position)
+        public MyClass(int b, int c) : this(b) // this(int)는 MyClass(int)를 호출함.
         {
-            this.Position = Position;
+            this.c = c;
+            Console.WriteLine($"MyClass({b}. {c})");
         }
 
-        public string GetPosition()
+        public void PrintFields()
         {
-            return this.Position;
+            Console.WriteLine($"a:{a}, b:{b}, c:{c}");
         }
     }
 
@@ -35,15 +40,16 @@ namespace This
     {
         static void Main(string[] args)
         {
-            Employee pooh = new Employee();
-            pooh.SetName("Pooh");
-            pooh.SetPosition("Waiter");
-            Console.WriteLine($"{pooh.GetName()} {pooh.GetPosition()}");
+            MyClass a = new MyClass();
+            a.PrintFields();
+            Console.WriteLine();
 
-            Employee tigger = new Employee();
-            tigger.SetName("Tigger");
-            tigger.SetPosition("Cleaner");
-            Console.WriteLine($"{tigger.GetName()} {tigger.GetPosition()}");
+            MyClass b = new MyClass(1);
+            b.PrintFields();
+            Console.WriteLine();
+
+            MyClass c = new MyClass(10, 20);
+            c.PrintFields();
         }
     }
 }
