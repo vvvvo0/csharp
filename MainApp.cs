@@ -1,21 +1,33 @@
 ﻿using System;
 
-namespace DeepCopy
+namespace This
 {
-    class MyClass
+    class Employee
     {
-        public int MyField1; 
-        public int MyField2; 
+        private string Name; // Employee 클래스의 필드 Name
+        private string Position;
 
-        public MyClass DeepCopy()
+        public void SetName(string Name) // 매개변수 Name
         {
-            MyClass newCopy = new MyClass(); // 클래스는 참조 형식이기 때문에
-                                             // 깊은 복사를 위해서는 이처럼 코드를 만들어야 함.
-                                             // 객체를 힙에 새로 할당해서 그곳에 자신의 멤버를 일일이 복사해 넣음.
-            newCopy.MyField1 = this.MyField1;
-            newCopy.MyField2 = this.MyField2;
+            this.Name = Name; // this.Name은 Employee 자신의 필드. Name은 메소드의 매개변수.
+                              // 이처럼 this 키워드를 활용하면 모호성을 풀 수 있음.
+                              // this 키워드: 객체 내부에서 자신의 필드나 메소드에 접근할 때 사용.
+                              // (객체 외부에서 객체의 필드나 메소드에 접근할 때는 객체의 이름(변수)를 사용)
+        }
 
-            return newCopy;
+        public string GetName()
+        {
+            return Name;
+        }
+
+        public void SetPosition(string Position)
+        {
+            this.Position = Position;
+        }
+
+        public string GetPosition()
+        {
+            return this.Position;
         }
     }
 
@@ -23,38 +35,15 @@ namespace DeepCopy
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Shallow Copy");
+            Employee pooh = new Employee();
+            pooh.SetName("Pooh");
+            pooh.SetPosition("Waiter");
+            Console.WriteLine($"{pooh.GetName()} {pooh.GetPosition()}");
 
-            {
-                MyClass source = new MyClass();  // source 인스턴스 생성
-                source.MyField1 = 10;
-                source.MyField2 = 20;
-
-                MyClass target = source; // target 인스턴스 생성
-                                         // 얕은 복사: 객체를 복사할 때 참조만 복사함
-                target.MyField2 = 30;
-
-                Console.WriteLine($"{source.MyField1} {source.MyField2}");
-                Console.WriteLine($"{target.MyField1} {target.MyField2}");
-            }
-
-            Console.WriteLine("Deep Copy");
-
-            {
-                MyClass source = new MyClass();
-                source.MyField1 = 10;
-                source.MyField2 = 20;
-
-                MyClass target = source.DeepCopy(); // 깊은 복사: 힙에 보관되어 있는 내용을 source로부터 복사해서,
-                                                    // 별도의 힙 공간에 객체를 보관
-                target.MyField1 = 30;
-                target.MyField2 = 30;
-
-                Console.WriteLine($"{source.MyField1} {source.MyField2}");
-                Console.WriteLine($"{target.MyField1} {target.MyField2}");
-            }
-            
+            Employee tigger = new Employee();
+            tigger.SetName("Tigger");
+            tigger.SetPosition("Cleaner");
+            Console.WriteLine($"{tigger.GetName()} {tigger.GetPosition()}");
         }
     }
 }
-
