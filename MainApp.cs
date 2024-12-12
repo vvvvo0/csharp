@@ -1,38 +1,60 @@
 ﻿using System;
 
-class Global
+namespace DeepCopy
 {
-    public static int Count = 0; // static으로 수식한 필드는 프로그램 전체에 걸쳐 하나만 존재.
-                                 // 따라서 프로그램 전체에 걸쳐 공유해야 한느 변수는 정적 필드 이용이 적절.
-}
-
-class ClassA
-{
-    public ClassA()
+    class MyClass
     {
-        Global.Count++; // 다른 클래스인 ClassA에서 Global 클래스의 정적 필드에 접근함.
+        public int MyField1; 
+        public int MyField2; 
+
+        public MyClass DeepCopy()
+        {
+            MyClass newCopy = new MyClass(); // 클래스는 참조 형식이기 때문에
+                                             // 깊은 복사를 위해서는 이처럼 코드를 만들어야 함.
+                                             // 객체를 힙에 새로 할당해서 그곳에 자신의 멤버를 일일이 복사해 넣음.
+            newCopy.MyField1 = this.MyField1;
+            newCopy.MyField2 = this.MyField2;
+
+            return newCopy;
+        }
+    }
+
+    class MainApp
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Shallow Copy");
+
+            {
+                MyClass source = new MyClass();  // source 인스턴스 생성
+                source.MyField1 = 10;
+                source.MyField2 = 20;
+
+                MyClass target = source; // target 인스턴스 생성
+                                         // 얕은 복사: 객체를 복사할 때 참조만 복사함
+                target.MyField2 = 30;
+
+                Console.WriteLine($"{source.MyField1} {source.MyField2}");
+                Console.WriteLine($"{target.MyField1} {target.MyField2}");
+            }
+
+            Console.WriteLine("Deep Copy");
+
+            {
+                MyClass source = new MyClass();
+                source.MyField1 = 10;
+                source.MyField2 = 20;
+
+                MyClass target = source.DeepCopy(); // 깊은 복사: 힙에 보관되어 있는 내용을 source로부터 복사해서,
+                                                    // 별도의 힙 공간에 객체를 보관
+                target.MyField1 = 30;
+                target.MyField2 = 30;
+
+                Console.WriteLine($"{source.MyField1} {source.MyField2}");
+                Console.WriteLine($"{target.MyField1} {target.MyField2}");
+            }
+            
+        }
     }
 }
 
-class ClassB
-{
-    public ClassB()
-    {
-        Global.Count++; // 다른 클래스인 ClassB에서 Global 클래스의 정적 필드에 접근함.
-    }
-}
-
-class MainApp
-{
-    static void Main()
-    {
-        Console.WriteLine($"Global.Count : {Global.Count}");
-
-        new ClassA();
-        new ClassA();
-        new ClassB();
-        new ClassB();
-
-        Console.WriteLine($"Global.Count : {Global.Count}");
-    }
-}
