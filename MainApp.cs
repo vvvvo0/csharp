@@ -1,34 +1,40 @@
-﻿using System; 
+﻿using System;
 
-namespace Hello 
+namespace Hello
 {
     class Mainapp
     {
-        static int Sum(params int[] args) // 가변 개수의 인수는 params 키워드와 배열을 이용해서 선언
+        class Cat // 클래스 선언, 모든 클래스는 복합 데이터 형식임. 그리고 복합 데이터 형식은 참조 형식임.
         {
-            Console.Write("Summing... ");
+            public string Name; // 필드: Name, Color 처럼 클래스 안에 선언된 변수들
+            public string Color;
 
-            int sum = 0;
-
-            for (int i = 0; i < args.Length; i++)
+            public void Meow() //메소드
             {
-                if (i > 0)
-                    Console.Write(", ");
-
-                Console.Write(args[i]);
-
-                sum += args[i];
+                Console.WriteLine($"{Name} : 야옹");
             }
-            Console.WriteLine();
-
-            return sum;
         }
 
-        static void Main(string[] args)
+        class MainApp
         {
-            int sum = Sum(3, 4, 5, 6, 7, 8, 9, 10);
+            static void Main(string[] args)
+            {
+                Cat kitty = new Cat(); // kitty 객체 생성,
+                                       // new키워드: 객체 생성에 사용하는 연산자
+                                       // Cat(): 생성자 메소드
+                                       // 매개변수가 없는 버전의 Cat() 생성자는 컴파일러가 자동으로 생성해준
+                                       // 생성자를 호출할 때처럼 사용
+                kitty.Color = "하얀색";
+                kitty.Name = "키티";
+                kitty.Meow();
+                Console.WriteLine($"{kitty.Name} : {kitty.Color}");
 
-            Console.WriteLine("Sum : {0}", sum);
+                Cat nero = new Cat();
+                nero.Color = "검은색";
+                nero.Name = "네로";
+                nero.Meow();
+                Console.WriteLine($"{nero.Name} : {nero.Color}");
+            }
         }
     }
 }
