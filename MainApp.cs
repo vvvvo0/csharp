@@ -1,38 +1,25 @@
 ﻿using System;
 
-namespace ThisConstructor
+namespace AccessModifier
 {
-    class MyClass
+    class WaterHeater
     {
-        int a, b, c; // int 형식의 필드 a, b, c
+        protected int temperature; // 파생클래스에서 접근 가능
 
-        public MyClass() // 생성자 MyClass() : 매개변수를 입력받아 필드를 원하는 값으로 초기화
+        public void SetTemperature(int temperature)
         {
-            this.a = 5425;
-            Console.WriteLine("MyClass()");
+            if (temperature < -5 || temperature > 42)
+            {
+                throw new Exception("Out of temperature range");
+            }
+
+            this.temperature = temperature; // protected로 수식된 필드이므로 외부에서 직접 접근 불가.
+                                            // 이렇게 public 메소드를 통해 접근해야 함.
         }
 
-        public MyClass(int b) : this() // this()는 자기 자신의 생성자를 가리킴.
-                                       // 생성자에서만 사용 가능. 얘처럼 생성자의 코드 블록 앞쪽에서만.
-                                       // this()는 MyClass()를 호출함.
-                                       // 이렇게 하는 이유는 a를 초기화 하려고 MyClass()를 호출해서 처리시킬 수 없는데, 
-                                       // 왜냐하면 원래는 new 연산자 없이 생성자를 호출할 수는 없기 때문.
-                                       // new 연산자를 쓰게 되면 해당 객체 외에 또 다른 객체를 만들어야 함.
-                                       // 이럴때 this()를 쓰면 자기 자신의 생성자를 가리키니까 new 연산자 안쓰고 해결 가능.
+        internal void TurnOnWater()
         {
-            this.b = b;
-            Console.WriteLine($"MyClass({b})");
-        }
-
-        public MyClass(int b, int c) : this(b) // this(int)는 MyClass(int)를 호출함.
-        {
-            this.c = c;
-            Console.WriteLine($"MyClass({b}. {c})");
-        }
-
-        public void PrintFields()
-        {
-            Console.WriteLine($"a:{a}, b:{b}, c:{c}");
+            Console.WriteLine($"Turn on water : {temperature}");
         }
     }
 
@@ -40,16 +27,22 @@ namespace ThisConstructor
     {
         static void Main(string[] args)
         {
-            MyClass a = new MyClass();
-            a.PrintFields();
-            Console.WriteLine();
+            try
+            {
+                WaterHeater heater = new WaterHeater();
+                heater.SetTemperature(20);
+                heater.TurnOnWater();
 
-            MyClass b = new MyClass(1);
-            b.PrintFields();
-            Console.WriteLine();
+                heater.SetTemperature(-2);
+                heater.TurnOnWater();
 
-            MyClass c = new MyClass(10, 20);
-            c.PrintFields();
+                heater.SetTemperature(50);
+                heater.TurnOnWater();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
     }
 }
