@@ -1,69 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
-
 /*
-중첩 클래스: 클래스 안에 선언되어 있는 클래스
-자신이 소속도니 클래스의 멤버에 자유롭게 접근 가능.
-심지어 private 멤버에도 접근 가능.
-왜 쓰냐? 클래스 외부에 공개하고 싶지 않은 형식 만들 때,
-혹은 현재 클래스의 일부분처럼 표현할 수 있는 클래스를 만들 때.
-즉, 유연한 표현력이 장점.
-단 은닉성 무너뜨리므로 조심.
+분할 클래스: 여러 번에 나눠서 구현하는 클래스.
+클래스의 구현이 길어질 경우 여러 파일에 나눠서 구현할 수 있게 함으로써,
+소스 코드 관리의 편의를 제공함.
+partial 키워드를 사용해서 작성.
+C# 컴파일러는 분할 구현된 코드를 하나의 MyClass로 묶어서 컴파일 함.
+그냥 하나의 클래스인 것처럼 사용하면 됨.
+큰 그림을 여러 조각으로 나누어 그린 후, 최종적으로 하나의 그림으로 합치는 것과 같음.
+
  */
-
-namespace NestedClass
+namespace PartialClass
 {
-    class Configuration
+    partial class MyClass // 클래스 이름 동일해야 함
+                          // MyClass라는 이름의 분할 클래스를 선언
     {
-        List<ItemValue> listConfig = new List<ItemValue>(); // ?
-
-        public void SetConfig(string item, string value)
+        public void Method1()
         {
-            ItemValue iv = new ItemValue();
-            iv.SetValue(this, item, value);
+            Console.WriteLine("Method1");
         }
 
-        public string GetConfig(string item)
+        public void Method2()
         {
-            foreach (ItemValue iv in listConfig)
-            {
-                if (iv.GetItem() == item)
-                    return iv.GetValue();
-            }
+            Console.WriteLine("Method2");
+        }
+    }
 
-            return "";
+    partial class MyClass // 클래스 이름 동일해야 함
+    {
+        public void Method3()
+        {
+            Console.WriteLine("Method3");
         }
 
-        private class ItemValue // Configuration 클래스 안에 선언된 중첩 클래스.
-                                // private로 선언했으므로 Configuration 클래스 밖에서는 안 보임.
+        public void Method4()
         {
-            private string item;
-            private string value;
-
-            public void SetValue(Configuration config, string item, string value)
-            {
-                this.item = item;
-                this.value = value;
-
-                bool found = false;
-                for (int i = 0; i < config.listConfig.Count; i++) // 중첩 클래스는 상위 클래스의 멤버에 자유롭게 접근 가능.
-                {
-                    if (config.listConfig[i].item == item)
-                    {
-                        config.listConfig[i] = this;
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found == false)
-                    config.listConfig.Add(this);
-            }
-
-            public string GetItem()
-            { return item; }
-            public string GetValue()
-            { return value; }
+            Console.WriteLine("Method4");
         }
     }
 
@@ -71,15 +42,15 @@ namespace NestedClass
     {
         static void Main(string[] args)
         {
-            Configuration config = new Configuration();
-            config.SetConfig("Version", "V 5.0");
-            config.SetConfig("Size", "655,324 KB");
-
-            Console.WriteLine(config.GetConfig("Version"));
-            Console.WriteLine(config.GetConfig("Size"));
-
-            config.SetConfig("Version", "V 5.0.1");
-            Console.WriteLine(config.GetConfig("Version"));
+            MyClass obj = new MyClass(); // MyClass 객체를 생성
+            obj.Method1(); // Method1(), Method2(), Method3(), Method4() 메서드를 호출
+            obj.Method2();
+            obj.Method3();
+            obj.Method4();
         }
     }
 }
+
+// MyClass 클래스는 두 개의 파일로 나누어 작성되었습니다.
+// 첫 번째 파일에는 Method1()과 Method2() 메서드가,
+// 두 번째 파일에는 Method3()과 Method4() 메서드가 정의되어 있습니다.
