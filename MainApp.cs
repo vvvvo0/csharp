@@ -1,36 +1,38 @@
 ﻿using System;
+/*
+ 읽기 전용 필드: 읽기만 가능한 필드
+ 클래스나 구조체의 멤버로만 존재할 수 있음.
+ 생성자 안에서만 초기화 할 수 있음.
+ 생성자 안에서 한 번 값을 지정하면 그 후로는 값을 변경할 수 없음.
+ readonly 키워드를 사용하서 선언.
+ */
 
-/* 오버라이딩 봉인: 파생 클래스의 작성자를 위한 기반 클래스 작성자의 배려.
- 파생 클래스의 작성자가 기반 클래스로부터 상속받은 메소드 하나를 오버라이딩 한 뒤,
- 이 때문에 오작동하게 된다면, 파생 클래스 작성자는 그 오작동의 원인을 알 길이 없음.
- 오버라이딩을잘못 해서 문제가 발생할 수 있다면, 봉인 메소드를 이용해서 상속을 사전에 막는 것이 나음.
- 컴파일할 때 에러가 나오기 때문. */
-
-class Base
+namespace ReadonlyFields
 {
-    public virtual void SealMe() // virtual로 선언된 가상 메소드
+    class Configuration
     {
+        readonly int min; // readonly를 사용해서 읽기 전용 필드 선언
+        readonly int max; // readonly를 사용해서 읽기 전용 필드 선언
+
+        public Configuration(int v1, int v2) // 읽기 전용 필드는 생성자 안에서만 초기화 가능
+        {
+            min = v1;
+            min = v2;
+        }
+
+        public void ChangeMax(int newMax) // 생성자가 아닌 다른 곳에서 값을 수정하면 컴파일 에러 발생
+                                          // 읽기 전용 필드에는 할당할 수 없습니다.
+                                          // 단, 필드가 정의된 형식의 생성자 또는 초기값 전용 setter나 변수 이니셜라이저에서는 예외입니다.
+        {
+            max = newMax;
+        }
     }
-}
 
-class Derived : Base
-{
-    public sealed override void SealMe() // virtual로 선언된 가상 메소드를 오버라이딩한 메소드에서만
-                                         // 이렇게 오버라이딩되지 않도록 sealed 키워드를 이용해서 봉인 가능.
+    class MainApp
     {
-    }
-}
-
-class WantToOverride : Derived
-{
-    public override void SealMe() // 'WantToOverride.SealMe()': 상속된 'Derived.SealMe()' 멤버는 봉인되어 있으므로 재정의할 수 없습니다.
-    {
-    }
-}
-
-class MainApp
-{
-    static void Main(string[] args)
-    {
+        static void Main(string[] args)
+        {
+            Configuration c = new Configuration(100, 10);
+        }
     }
 }
