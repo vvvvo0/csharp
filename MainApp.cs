@@ -1,30 +1,69 @@
 ﻿using System;
+using System.Collections.Generic;
+
 /*
- 읽기 전용 필드: 읽기만 가능한 필드
- 클래스나 구조체의 멤버로만 존재할 수 있음.
- 생성자 안에서만 초기화 할 수 있음.
- 생성자 안에서 한 번 값을 지정하면 그 후로는 값을 변경할 수 없음.
- readonly 키워드를 사용하서 선언.
+중첩 클래스: 클래스 안에 선언되어 있는 클래스
+자신이 소속도니 클래스의 멤버에 자유롭게 접근 가능.
+심지어 private 멤버에도 접근 가능.
+왜 쓰냐? 클래스 외부에 공개하고 싶지 않은 형식 만들 때,
+혹은 현재 클래스의 일부분처럼 표현할 수 있는 클래스를 만들 때.
+즉, 유연한 표현력이 장점.
+단 은닉성 무너뜨리므로 조심.
  */
 
-namespace ReadonlyFields
+namespace NestedClass
 {
     class Configuration
     {
-        readonly int min; // readonly를 사용해서 읽기 전용 필드 선언
-        readonly int max; // readonly를 사용해서 읽기 전용 필드 선언
+        List<ItemValue> listConfig = new List<ItemValue>(); // ?
 
-        public Configuration(int v1, int v2) // 읽기 전용 필드는 생성자 안에서만 초기화 가능
+        public void SetConfig(string item, string value)
         {
-            min = v1;
-            min = v2;
+            ItemValue iv = new ItemValue();
+            iv.SetValue(this, item, value);
         }
 
-        public void ChangeMax(int newMax) // 생성자가 아닌 다른 곳에서 값을 수정하면 컴파일 에러 발생
-                                          // 읽기 전용 필드에는 할당할 수 없습니다.
-                                          // 단, 필드가 정의된 형식의 생성자 또는 초기값 전용 setter나 변수 이니셜라이저에서는 예외입니다.
+        public string GetConfig(string item)
         {
-            max = newMax;
+            foreach (ItemValue iv in listConfig)
+            {
+                if (iv.GetItem() == item)
+                    return iv.GetValue();
+            }
+
+            return "";
+        }
+
+        private class ItemValue // Configuration 클래스 안에 선언된 중첩 클래스.
+                                // private로 선언했으므로 Configuration 클래스 밖에서는 안 보임.
+        {
+            private string item;
+            private string value;
+
+            public void SetValue(Configuration config, string item, string value)
+            {
+                this.item = item;
+                this.value = value;
+
+                bool found = false;
+                for (int i = 0; i < config.listConfig.Count; i++) // 중첩 클래스는 상위 클래스의 멤버에 자유롭게 접근 가능.
+                {
+                    if (config.listConfig[i].item == item)
+                    {
+                        config.listConfig[i] = this;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found == false)
+                    config.listConfig.Add(this);
+            }
+
+            public string GetItem()
+            { return item; }
+            public string GetValue()
+            { return value; }
         }
     }
 
@@ -32,7 +71,15 @@ namespace ReadonlyFields
     {
         static void Main(string[] args)
         {
-            Configuration c = new Configuration(100, 10);
+            Configuration config = new Configuration();
+            config.SetConfig("Version", "V 5.0");
+            config.SetConfig("Size", "655,324 KB");
+
+            Console.WriteLine(config.GetConfig("Version"));
+            Console.WriteLine(config.GetConfig("Size"));
+
+            config.SetConfig("Version", "V 5.0.1");
+            Console.WriteLine(config.GetConfig("Version"));
         }
     }
 }
