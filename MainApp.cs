@@ -1,54 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
 
 
 /*
-변경불가능 객체: 상태(속성)의 변화를 허용하지 않는 객체
-변경불가능 구조체: 모든 필드와 프로퍼티의 값을 수정할 수 없는 구조체.
-구조체를 선언할 때 readonly 키워드만 기입하면 됨.
+읽기 전용 메소드: 건드려서는 안되는 상태를 수정하는 실수를 방지.
+readonly 한정자를 이용해서 메소드에게 상태를 바꾸지 않도록 강제.
+구조체안에서만 선언 가능.
+
+readonly로 한정한 메소드에서 객체의 필드를 바꾸려 하면 컴파일 에러 발생해서 알려줌.
 
  */
 
 
-namespace ReadonlyStruct
+namespace ReadonlyMothod
 {
-    readonly struct Transaction // readonly 키워드
+    struct ACSetting
     {
-        public Transaction(string from, string to, int amount)
-        {
-            transactionId = Guid.NewGuid();
-            this.from = from;
-            this.to = to;
-            this.amount = amount;
-        }
+        public double currentInCelsius; // 현재 온도(°C)
+        public double target; // 희망 온도
 
-        public readonly Guid transactionId; // readonly로 선언된 구조체 안에서는 모든 필드와 프로퍼티가 readonly 키워드로 선언돼야 함.
-        public readonly string from;
-        public readonly string to;
-        public readonly int amount;
+        public readonly double GetFahrenheit()
+        {
+            target = currentInCelsius * 1.8 + 32; // 화씨(°F) 계산 결과를 target에 저장
+                                                  // 오류: 읽기 전용인 'target'에는 할당할 수 없습니다.
+                                                  // readonly로 한정한 메소드에서 객체의 필드를 바꾸려 해서 컴파일 에러 발생함.
+            return target; // target 반환
+        }
     }
 
     class MainApp
     {
         static void Main(string[] args)
         {
-            List<Transaction> transactions = new List<Transaction>();
-            transactions.Add(new Transaction("Alice", "Bob", 100));
-            transactions.Add(new Transaction("Alice", "Charlie", 50));
-            transactions.Add(new Transaction("Bob", "Charlie", 20));
-            transactions.Add(new Transaction("Dave", "Alice", 40));
+            ACSetting acs;
+            acs.currentInCelsius = 25;
+            acs.target = 25;
 
-            int revenue = 0;
-            int expense = 0;
-            foreach (var t in transactions)
-            {
-                if (t.from == "Alice")
-                    revenue += t.amount;
-                else if (t.to == "Alice")
-                    expense += t.amount;
-            }
-
-            Console.WriteLine($"Alice's profit : {revenue - expense}");
+            Console.WriteLine($"{acs.GetFahrenheit()}");
+            Console.WriteLine($"{acs.target}");
         }
     }
 }
