@@ -2,41 +2,38 @@
 
 
 /*
-읽기 전용 메소드: 건드려서는 안되는 상태를 수정하는 실수를 방지.
-readonly 한정자를 이용해서 메소드에게 상태를 바꾸지 않도록 강제.
-구조체안에서만 선언 가능.
-
-readonly로 한정한 메소드에서 객체의 필드를 바꾸려 하면 컴파일 에러 발생해서 알려줌.
-
+튜플: 여러 필드를 담을 수 있는 구조체. 
+단, 형식 이름이 없음. -> 따라서 형식을 선언할 떄가 아닌 즉석에서 사용할 복합 데이터 형식을 선언할 때 적합!
+구조체 -> 값 형식. 
  */
 
 
-namespace ReadonlyMothod
+namespace Tuple
 {
-    struct ACSetting
-    {
-        public double currentInCelsius; // 현재 온도(°C)
-        public double target; // 희망 온도
-
-        public readonly double GetFahrenheit()
-        {
-            target = currentInCelsius * 1.8 + 32; // 화씨(°F) 계산 결과를 target에 저장
-                                                  // 오류: 읽기 전용인 'target'에는 할당할 수 없습니다.
-                                                  // readonly로 한정한 메소드에서 객체의 필드를 바꾸려 해서 컴파일 에러 발생함.
-            return target; // target 반환
-        }
-    }
-
     class MainApp
     {
         static void Main(string[] args)
         {
-            ACSetting acs;
-            acs.currentInCelsius = 25;
-            acs.target = 25;
+            // 명명되지 않은 튜플
+            var a = ("슈퍼맨", 9999); // 튜플은 var로 선언. 괄호 안에 두 개 이상의 필드를 지정함으로써 생성.
+            Console.WriteLine($"{a.Item1}, {a.Item2}");
 
-            Console.WriteLine($"{acs.GetFahrenheit()}");
-            Console.WriteLine($"{acs.target}");
+            // 명명된 튜플
+            var b = (Name: "박상현", Age: 17); // '필드명:' 꼴로 필드 이름 지정하여 튜플 선언.
+            Console.WriteLine($"{b.Name}, {b.Age}");
+
+            // 분해
+            var (name, age) = b; // (var name, var age) = b;
+            Console.WriteLine($"{name}, {age}");
+
+            // 분해2
+            var (name2, age2) = ("박문수", 34); // 튜플 분해: 여러 변수를 단번에 생성하고 초기화 가능(튜플 만들자 마자 분해).
+            Console.WriteLine($"{name2}, {age2}"); // 출력: 박문수, 34
+
+            // 명명된 튜플 = 명명되지 않은 튜플
+            b = a; // // 명명0 명명x 튜플 간에 필드의 수와 형식이 같으면 이렇게 할당이 가능함.
+            Console.WriteLine($"{b.Name}, {b.Age}"); 
+
         }
     }
 }
