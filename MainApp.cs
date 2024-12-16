@@ -1,56 +1,64 @@
 ﻿using System;
+using MyExtension; // 확장 메소드를 담는 클래스의 네임스페이스를 사용함.
+
+
 /*
-분할 클래스: 여러 번에 나눠서 구현하는 클래스.
-클래스의 구현이 길어질 경우 여러 파일에 나눠서 구현할 수 있게 함으로써,
-소스 코드 관리의 편의를 제공함.
-partial 키워드를 사용해서 작성.
-C# 컴파일러는 분할 구현된 코드를 하나의 MyClass로 묶어서 컴파일 함.
-그냥 하나의 클래스인 것처럼 사용하면 됨.
-큰 그림을 여러 조각으로 나누어 그린 후, 최종적으로 하나의 그림으로 합치는 것과 같음.
-
+ 확장 메소드: '기존 클래스'의 기능을 확장 != 상속
+ 상속(기반 클래스를 물려 받아 파생 클래스를 만든 뒤 파생 클래스에 필드나 메소드 추가)과 다름
  */
-namespace PartialClass
+
+
+namespace MyExtension // using에 사용함.
 {
-    partial class MyClass // 클래스 이름 동일해야 함
-                          // MyClass라는 이름의 분할 클래스를 선언
+    public static class IntegerExtension // 기존 클래스를 static 한정자로 수식
     {
-        public void Method1()
+        public static int Square(this int myInt) // 확장 메소드
+                                                 // 메소드를 static 한정자로 수식
+                                                 // 첫 번째 매개변수는 반드시 this 키워드와 함께 확장하려는 클래스(or 형식)의 인스턴스여야 함.
+
         {
-            Console.WriteLine("Method1");
+            return myInt * myInt;
         }
 
-        public void Method2()
-        {
-            Console.WriteLine("Method2");
-        }
-    }
+        public static int Power(this int myInt, int exponent) // 확장 메소드 Power()
+                                                              // 첫 번째 매개변수에 this 키워드를 사용하여 int 형식에 대한 확장 메서드임을 나타냅니다.
+                                                              // 메소드를 static 한정자로 수식
+                                                              // 첫 번째 매개변수는 반드시 this 키워드와 함께 확장하려는 클래스(or 형식)의 인스턴스여야 함.
+                                                              // , 뒤에가 확장 메소드를 호출할 때 입력되는 매개변수임.(여기서는 exponent)
 
-    partial class MyClass // 클래스 이름 동일해야 함
-    {
-        public void Method3()
         {
-            Console.WriteLine("Method3");
-        }
+            int result = myInt;
+            for (int i = 1; i < exponent; i++)
+                result = result * myInt;
 
-        public void Method4()
-        {
-            Console.WriteLine("Method4");
-        }
-    }
-
-    class MainApp
-    {
-        static void Main(string[] args)
-        {
-            MyClass obj = new MyClass(); // MyClass 객체를 생성
-            obj.Method1(); // Method1(), Method2(), Method3(), Method4() 메서드를 호출
-            obj.Method2();
-            obj.Method3();
-            obj.Method4();
+            return result;
         }
     }
 }
 
-// MyClass 클래스는 두 개의 파일로 나누어 작성되었습니다.
-// 첫 번째 파일에는 Method1()과 Method2() 메서드가,
-// 두 번째 파일에는 Method3()과 Method4() 메서드가 정의되어 있습니다.
+namespace ExtensionMethod
+{
+    class MainApp
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine($"{3}^2 : {3.Square()}"); // 9
+            Console.WriteLine($"{3}^{4} : {3.Power(4)}"); // 3.Power(4) >> Power()가 원래부터 int 형식의 메소드였던 것처럼 사용함.
+                                                          // int 형식의 값 3에서 Power() 메서드를 호출하기 위해 사용.
+                                                          // Power() 메서드는 IntegerExtension 클래스에 정의된 확장 메서드이므로,
+                                                          // int 형식의 값에서 마치 int 클래스의 메서드처럼 호출할 수 있습니다.
+
+            // Power(4)에서 괄호 안에 4를 넣은 것은 int 형식의 값을 인자로 전달한 것입니다.
+            // Power() 메서드는 IntegerExtension 클래스에서 int 형식의 확장 메서드로 정의되어 있고,
+            // 두 번째 매개변수로 int exponent를 받습니다.따라서 Power(4)와 같이 호출하면
+            // 4라는 int 값이 exponent 매개변수에 전달됩니다.
+
+            Console.WriteLine($"{2}^{10} : {2.Power(10)}"); // 1024
+        }
+    }
+}
+
+
+// Power() 메서드는 원래 int 형식의 메서드가 아니었지만, 확장 메서드를 통해 int 형식에서 사용할 수 있게 된 것.
+// 확장 메서드는 기존 클래스에 새로운 메서드를 추가하는 것처럼 보이게 하는 기능입니다.
+// 실제로는 별도의 static 클래스에 정의된 static 메서드이지만, 마치 원래 클래스의 메서드처럼 사용할 수 있습니다.
