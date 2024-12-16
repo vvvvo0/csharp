@@ -2,55 +2,77 @@
 
 
 /*
-튜플은 분해자를 구현하고 있어서 분해가 가능.
+인터페이스: 
+인스턴스를 가질 수 없지만, 인터페이스를 상속받는 클래스의 인스턴스를 만드는 것 가능.
+파생 클래스는 인터페이스에 선언된 모든 메소드 및 프로퍼티를 구현해야 함. (인터페이스는 '약속'이다!)
+이 메소드들은 public 한정자로 수식해야 함.
 
-위치 패턴 매칭: 분해자를 구현하고 있는 객체를 분해한 결과를
-                Switch 문이나 Switch 식의 분기 조건에 활용한 것.
-                
-튜플의 요소들을 분해하고, 그 '분해된 요소의 위치'에 따라 값이 일치하는지 판단하여 
-switch 문이나 switch 식의 분기 조건에 활용하는 기능임.
+인터페이스 장점?
+다형성: 
+인터페이스를 사용하면 다양한 클래스에서 동일한 메서드를 구현하도록 강제할 수 있음. 
+이를 통해 코드의 유연성과 재사용성을 높일 수 있음.
  */
 
 
-// 튜플과 위치 패턴 매칭을 사용하여 클라이언트 유형에 따라 할인율을 계산하는 프로그램
-
-namespace PosisionalPattern
+namespace DerivedInterface
 {
-    class MainApp
+
+    // ILogger: WriteLog(string message) 메서드를 정의하는 인터페이스입니다.
+    interface ILogger // interface 키워드를 이용해서 선언
     {
-        private static double GetDiscountRate(object client) // 매개변수 이름은 client이지만, 실제로 메서드에 전달하는 변수의 이름은 달라도 괜찮음.
-                                                             // 즉, alice 튜플을 인자로 전달 가능.
-                                                             // GetDiscountRate() 메서드는 object 타입의 매개변수를 받기 때문에,
-                                                             // 어떤 이름의 변수든 object 타입으로 변환될 수 있다면 메서드에 전달할 수 있음.
+        void WriteLog(string message);
+    }
+
+
+    // IFormattableLogger: ILogger 인터페이스를 상속하고,
+    // WriteLog(string format, params Object[] args) 메서드를 추가로 정의하는 인터페이스임.
+    interface IFormattableLogger : ILogger
+    {
+        void WriteLog(string format, params Object[] args);
+        // string format:
+        // 서식 문자열을 나타내는 매개변수입니다.
+        // 서식 문자열은 {0}, {1}과 같은 자리 표시자를 포함할 수 있으며,
+        // 이 자리 표시자는 args 배열의 요소로 대체됩니다.
+
+        // params Object[] args:
+        // 가변 개수의 인자를 나타내는 매개변수입니다.
+        // params 키워드는 메서드가 임의 개수의 인자를 받을 수 있도록 해줍니다.
+        // Object[]는 args 매개변수가 Object 타입의 배열임을 나타냅니다.
+        // 즉, args 배열에는 어떤 타입의 객체든 저장할 수 있습니다.
+    }
+
+
+    // ConsoleLogger2: IFormattableLogger 인터페이스를 구현하는 클래스.
+    // WriteLog() 메서드를 두 가지 버전으로 구현하여, 문자열 또는 서식 문자열을 사용하여 로그를 출력.
+    class ConsoleLogger2 : IFormattableLogger 
+    {
+        public void WriteLog(string message)
         {
-            return client switch // client의 값에 따라 할인율을 계산
-            {
-                ("학생", int n) when n < 18 => 0.2,  // client가 학생 & 18세 미만이면 0.2 (20%) 할인율을 반환함.
-                ("학생", _) => 0.1,  // client가 학생이면 0.1 (10%) 할인율을 반환. _는 나이 값을 무시한다는 의미.
-                                     // 즉, 나이 값에 관계없이 "학생"이면 0.1 (10%) 할인율을 적용한다는 의미
-                ("일반", int n) when n < 18 => 0.1,  // client가 "일반"이고 나이가 18세 미만이면 0.1 (10%) 할인율을 반환합니다.
-                ("일반", _) => 0.05, // client가 "일반"이면 나이에 관계없이 0.05 할인율을 반환.
-                _ => 0, //  위 조건에 해당하지 않으면 0 (0%) 할인율을 반환
-            };
+            Console.WriteLine(
+                $"{DateTime.Now.ToLocalTime()}, {message}"); // DateTime.Now.ToLocalTime(): C#에서 기본적으로 제공되는 DateTime 구조체의 멤버 메서드
+                                                             // DateTime 구조체는 System 네임스페이스에 정의되어 있으므로, using System;을 사용하면 DateTime 구조체를 사용할 수 있습니다.
+                                                             // DateTime 구조체는 C#에서 기본적으로 제공되는 구조체이므로, 따로 클래스를 정의하지 않아도 사용할 수 있습니다.
         }
 
+        public void WriteLog(string format, params Object[] args)
+        {
+            String message = String.Format(format, args);
+            Console.WriteLine(
+                $"{DateTime.Now.ToLocalTime()}, {message}");
+        }
+    }
+
+    class MainApp
+    {
         static void Main(string[] args)
         {
-            var alice = (job: "학생", age: 17); // alice라는 변수에 "학생"이라는 job과 17이라는 age를 튜플로 묶어서 저장
-            var bob = (job: "학생", age: 23);
-            var charlie = (job: "일반", age: 15);
-            var dave = (job: "일반", age: 21);
+            IFormattableLogger logger = new ConsoleLogger2(); // IFormattableLogger 타입의 변수 logger를 선언하고 ConsoleLogger2 객체를 할당함.
+                                                              // logger를 통해 ConsoleLogger2 객체에 접근하고,
+                                                              // ConsoleLogger2 객체의 메서드를 호출하거나 속성에 접근할 수 있음.
 
-            Console.WriteLine($"alice   : {GetDiscountRate(alice)}"); // GetDiscountRate(alice)는 GetDiscountRate() 메서드를 호출하면서 alice 튜플을 인자로 전달
-            Console.WriteLine($"bob     : {GetDiscountRate(bob)}");
-            Console.WriteLine($"charlie : {GetDiscountRate(charlie)}");
-            Console.WriteLine($"dave    : {GetDiscountRate(dave)}");
+            logger.WriteLog("The world is not flat."); // WriteLog() 메서드를 호출하여 문자열을 출력
+            logger.WriteLog("{0} + {1} = {2}", 1, 1, 2); // WriteLog() 메서드를 호출하여 서식 문자열을 사용하여 출력
+                                                         // 출력: 1+1=2
         }
     }
 }
-
-// 출력 결과
-// alice   : 0.2
-// bob: 0.1
-// charlie: 0.1
-// dave: 0.05
