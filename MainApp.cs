@@ -1,78 +1,88 @@
 ﻿using System;
+using AbstractClass;
 
 
 /*
-인터페이스: 
-인스턴스를 가질 수 없지만, 인터페이스를 상속받는 클래스의 인스턴스를 만드는 것 가능.
-파생 클래스는 인터페이스에 선언된 모든 메소드 및 프로퍼티를 구현해야 함. (인터페이스는 '약속'이다!)
-이 메소드들은 public 한정자로 수식해야 함.
+추상 클래스:
+구현을 가질 수 있으나, 클래스와 달리 인스턴스를 가질 수 없음. 
+객체를 직접 생성할 수 없는 클래스로, 파생 클래스에서 상속받아 사용해야 함.
+abstract 한정자와 class 키워드를 이용해서 선언.
 
-인터페이스 장점?
-다형성: 
-인터페이스를 사용하면 다양한 클래스에서 동일한 메서드를 구현하도록 강제할 수 있음. 
-이를 통해 코드의 유연성과 재사용성을 높일 수 있음.
+-> 클래스와 차이점:
+직접 인스턴스를 가질 수 없음.
+추상 메소드를 가질 수 있음.
+
+추상 메소드:
+구현을 갖지 못하지만, 추상 클래스를 상속하는 파생 클래스에서 반드시 이 메소드를 구현하도록 강제함.
+즉, 추상 클래스가 '인터페이스의 역할'도 할 수 있게 해주는 장치.
+-> 따라서 접근자는 private가 될 수 없도록 c# 컴파일러가 강제함.
+abstract 한정자로 선언.
+
+
+추상 클래스의 장점:
+공통적인 기능을 추상 클래스에 정의하고, 파생 클래스에서 세부적인 기능을 구현할 수 있습니다.
+파생 클래스에서 특정 메서드를 반드시 구현하도록 강제할 수 있습니다.
+코드의 재사용성을 높이고 유지보수를 용이하게 합니다.
  */
 
-
-namespace DerivedInterface
+namespace AbstractClass 
 {
 
-    // ILogger: WriteLog(string message) 메서드를 정의하는 인터페이스입니다.
-    interface ILogger // interface 키워드를 이용해서 선언
+    // 추상 클래스 정의
+    abstract class AbstractBase // 추상 클래스
+                                // abstract 키워드를 사용하여 AbstractBase를 추상 클래스로 선언
     {
-        void WriteLog(string message);
-    }
-
-
-    // IFormattableLogger: ILogger 인터페이스를 상속하고,
-    // WriteLog(string format, params Object[] args) 메서드를 추가로 정의하는 인터페이스임.
-    interface IFormattableLogger : ILogger
-    {
-        void WriteLog(string format, params Object[] args);
-        // string format:
-        // 서식 문자열을 나타내는 매개변수입니다.
-        // 서식 문자열은 {0}, {1}과 같은 자리 표시자를 포함할 수 있으며,
-        // 이 자리 표시자는 args 배열의 요소로 대체됩니다.
-
-        // params Object[] args:
-        // 가변 개수의 인자를 나타내는 매개변수입니다.
-        // params 키워드는 메서드가 임의 개수의 인자를 받을 수 있도록 해줍니다.
-        // Object[]는 args 매개변수가 Object 타입의 배열임을 나타냅니다.
-        // 즉, args 배열에는 어떤 타입의 객체든 저장할 수 있습니다.
-    }
-
-
-    // ConsoleLogger2: IFormattableLogger 인터페이스를 구현하는 클래스.
-    // WriteLog() 메서드를 두 가지 버전으로 구현하여, 문자열 또는 서식 문자열을 사용하여 로그를 출력.
-    class ConsoleLogger2 : IFormattableLogger 
-    {
-        public void WriteLog(string message)
+        protected void PrivateMethodA() // protected 접근 제한자를 가진 메서드. 파생 클래스에서 접근 가능.
         {
-            Console.WriteLine(
-                $"{DateTime.Now.ToLocalTime()}, {message}"); // DateTime.Now.ToLocalTime(): C#에서 기본적으로 제공되는 DateTime 구조체의 멤버 메서드
-                                                             // DateTime 구조체는 System 네임스페이스에 정의되어 있으므로, using System;을 사용하면 DateTime 구조체를 사용할 수 있습니다.
-                                                             // DateTime 구조체는 C#에서 기본적으로 제공되는 구조체이므로, 따로 클래스를 정의하지 않아도 사용할 수 있습니다.
+            Console.WriteLine("AbstractBase.PrivateMethodA()");
         }
 
-        public void WriteLog(string format, params Object[] args)
+        public void PublicMethodA() // public 접근 제한자를 가진 메서드
         {
-            String message = String.Format(format, args);
-            Console.WriteLine(
-                $"{DateTime.Now.ToLocalTime()}, {message}");
+            Console.WriteLine("AbstractBase.PublicMethodA()");
+        }
+
+        public abstract void AbstractMethodA(); // 추상 메소드
+                                                // abstract 키워드를 사용하여 추상 메서드로 선언.
+                                                // 추상 메소드는 구현 코드가 없으며(이렇게 비워놔야 함),
+                                                // 파생 클래스에서 반드시 재정의(오버라이딩)해야 합니다.
+    }
+
+
+    // 파생 클래스 정의
+    class Derived : AbstractBase // 파생 클래스
+                                 // Derived: AbstractBase 클래스를 상속받는 클래스
+    {
+        public override void AbstractMethodA() // 추상 메소드 구현
+                                               // (구현=재정의=오버라이딩)
+                                               // override 키워드를 사용하여 기본 클래스의 추상 메서드를 재정의함.
+        {
+            Console.WriteLine("Derived.AbstractMethodA()");
+            PrivateMethodA(); // 기본 클래스의 protected 메서드를 호출함.
         }
     }
+
 
     class MainApp
     {
         static void Main(string[] args)
         {
-            IFormattableLogger logger = new ConsoleLogger2(); // IFormattableLogger 타입의 변수 logger를 선언하고 ConsoleLogger2 객체를 할당함.
-                                                              // logger를 통해 ConsoleLogger2 객체에 접근하고,
-                                                              // ConsoleLogger2 객체의 메서드를 호출하거나 속성에 접근할 수 있음.
+            AbstractBase obj = new Derived(); // AbstractBase 타입의 변수 obj를 선언하고 Derived 클래스의 객체를 할당합니다. 
+                                              // 추상 클래스는 직접 객체를 생성할 수 없지만, 파생 클래스의 객체를 할당할 수 있음.
+                                              // Derived 클래스의 객체를 생성하고 AbstractBase 타입으로 변환
 
-            logger.WriteLog("The world is not flat."); // WriteLog() 메서드를 호출하여 문자열을 출력
-            logger.WriteLog("{0} + {1} = {2}", 1, 1, 2); // WriteLog() 메서드를 호출하여 서식 문자열을 사용하여 출력
-                                                         // 출력: 1+1=2
+            obj.AbstractMethodA(); // obj 변수를 통해 AbstractMethodA() 메서드를 호출합니다.
+                                   // Derived 클래스에서 재정의된 AbstractMethodA() 메서드가 실행됩니다.
+
+            obj.PublicMethodA(); // obj 변수를 통해 PublicMethodA() 메서드를 호출합니다.
+                                 // AbstractBase 클래스에 정의된 메서드가 실행됩니다.
         }
     }
 }
+
+
+/*출력:
+Derived.AbstractMethodA()
+AbstractBase.PrivateMethodA()
+AbstractBase.PublicMethodA()
+*/
