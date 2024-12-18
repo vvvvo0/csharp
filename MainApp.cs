@@ -1,23 +1,26 @@
 ﻿using System;
-using System.Xml.Linq;
 
-
-/*
-자동 구현 프로퍼티
- 
- */
-
-namespace AutoImplementedProperty
+namespace ConstructorWithProperty
 {
     class BirthdayInfo
     {
-        public string Name { get; set; } = "Unknown";  // 자동 구현 속성, 기본값 "Unknown"
-        public DateTime Birthday { get; set; } = new DateTime(1, 1, 1); // 자동 구현 속성, 기본값 1년 1월 1일
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        public DateTime Birthday
+        {
+            get;
+            set;
+        }
+
         public int Age
         {
             get
             {
-                return new DateTime(DateTime.Now.Subtract(Birthday).Ticks).Year; // 현재 날짜와 Birthday의 차이를 계산하여 나이 반환
+                return new DateTime(DateTime.Now.Subtract(Birthday).Ticks).Year;
             }
         }
     }
@@ -26,18 +29,16 @@ namespace AutoImplementedProperty
     {
         static void Main(string[] args)
         {
-            BirthdayInfo birth = new BirthdayInfo();// BirthdayInfo 객체 생성
-            Console.WriteLine($"Name : {birth.Name}"); // Name 속성 출력("Unknown")
-            Console.WriteLine($"Birthday : {birth.Birthday.ToShortDateString()}"); // Birthday 속성 출력 (1/1/1)
-            Console.WriteLine($"Age : {birth.Age}"); // Age 속성 출력 (현재 연도 - 1)
+            BirthdayInfo birth = new BirthdayInfo()
+            {
+                Name = "서현",
 
-            birth.Name = "서현"; // Name 속성에 "서현" 할당
-            birth.Birthday = new DateTime(1991, 6, 28); // Birthday 속성에 1991년 6월 28일 할당
+                Birthday = new DateTime(1991, 6, 28) // 객체 초기화자는 중괄호 {} 안에 속성 이름과 값을 콜론(:)으로 구분하여 작성
+            };
 
-
-            Console.WriteLine($"Name : {birth.Name}"); // Name 속성 출력("서현")
-            Console.WriteLine($"Birthday : {birth.Birthday.ToShortDateString()}"); // Birthday 속성 출력 (1991-06-28)
-            Console.WriteLine($"Age : {birth.Age}"); // Age 속성 출력 (현재 연도 - 1991)
+            Console.WriteLine("Name : {0}", birth.Name);
+            Console.WriteLine("Birthday : {0}", birth.Birthday.ToShortDateString());
+            Console.WriteLine("Age : {0}", birth.Age);
         }
     }
 }
