@@ -2,121 +2,97 @@
 
 
 /*
-C#에서 모든 배열은 System.Array 클래스에서 파생됨.
-따라서 모든 배열은 System.Array 클래스의 멤버를 상속받아 사용할 수 있음.
+슬라이스(Slice): 배열의 일부분을 추출하여 새로운 배열을 만드는 기능
+Array.Copy() 메서드보다 편함.
 
-System.Array 클래스에 있는 메소드와 프로퍼티들을 사용해서,
-배열 내부의 데이터를 원하는 순서대로 정렬하거나,특정 데이터를 배열 속에서 찾아내는 작업 등을 쉽게 할 수 있음.
+Range 타입(System.Range 형식)과 인덱스 from end 연산자(^)를 사용하여 배열의 슬라이스를 생성할 수 있습니다.
+System.Range 타입: 
+이름에서 처럼 시작 인덱스와 마지막 인덱스를 이용해서 범위를 나타냄.
+
+.. 연산자:
+두 번째 피연산자, 즉 마지막 인덱스는 배열 분할 결과에서 제외되므로 주의.
+예를 들어, int[] slied3 = scores[..3]; // 첫 번째(0) 요소부터 세 번째(2) 요소까지임
  */
 
 
-// 배열을 다루는 다양한 메서드와 프로퍼티(Array 클래스의 메서드와 프로퍼티)를 사용하는 방법을 보여줌
-namespace MoreOnArray
+// 배열의 슬라이스(Slice) 기능을 사용하는 방법을 보여준다.
+namespace Slice
 {
     class MainApp
     {
-        private static bool CheckPassed(int score) // CheckPassed 메서드:
-                                                   // 정수형 점수를 입력으로 받아 60점 이상이면 true, 미만이면 false를 반환합니다.
+        static void PrintArray(System.Array array) // 배열을 입력으로 받아 배열의 모든 요소를 출력합니다.
+                                                   // foreach 문의 괄호 안에 System.Array를 붙이는 이유는
+                                                   // PrintArray() 메서드가 모든 종류의 배열을 입력으로 받을 수 있도록 하기 위해서입니다.
+                                                   // 즉, int[], char[], string[] 등 모든 배열은 System.Array 타입으로 취급될 수 있습니다.
+                                                   // PrintArray() 메서드의 매개변수를 System.Array 타입으로 선언하면,
+                                                   // 어떤 종류의 배열이든 PrintArray() 메서드에 전달할 수 있습니다.
         {
-            return score >= 60; 
+            foreach (var e in array) // array 배열의 각 요소를 순회하며, 각 요소를 e 변수에 할당함.
+                                     // var 키워드는 컴파일러가 변수의 타입을 자동으로 유추하도록 하는 키워드.
+                                     // 여기서 array가 char[] 타입이므로, e 변수는 char 타입으로 선언됨.
+                Console.Write(e); // Console.Write: 값을 출력만 하고 줄 바꿈을 하지 않습니다.
+            Console.WriteLine();
         }
 
-        private static void Print(int value) // Print 메서드:
-                                             // 정수형 값을 입력으로 받아 콘솔에 출력합니다.
-        {
-            Console.Write($"{value} ");
-        }
 
         static void Main(string[] args)
         {
-            int[] scores = new int[] { 80, 74, 81, 90, 34 }; //  5개의 정수 값을 가진 scores 배열을 선언하고 초기화합니다.
-
-            foreach (int score in scores) // foreach 문을 사용하여 scores 배열의 각 요소를 출력합니다.
-                Console.Write($"{score} ");
-            Console.WriteLine();
-
-
-            Array.Sort(scores); // scores 배열을 오름차순으로 정렬합니다.
-
-            Array.ForEach<int>(scores, new Action<int>(Print)); // scores 배열의 각 요소에 대해 Print 메서드를 호출합니다.
-                                                                // Print 메서드는 배열 요소를 콘솔에 출력합니다.
-                                                                // <T>는 형식(Type) 매개변수로, 
-                                                                // <T>가 포함된 메서드를 호출할 때는 T 대신 배열의 기반 자료형(여기선 int)을
-                                                                // 인수로 입력하면 컴파일러가 해당 형식에 맞춰 동작하도록 메서드를 컴파일합니다.
-
-            Console.WriteLine();
+            char[] array = new char['Z' - 'A' + 1]; //  'A'부터 'Z'까지의 문자를 저장할 수 있는, array 배열을 선언합니다.
+            for (int i = 0; i < array.Length; i++) // array 배열에 'A'부터 'Z'까지의 문자를 저장합니다.
+                                                   // i 변수를 0부터 array.Length - 1까지 반복합니다.
+                                                   // array.Length는 배열의 크기, 즉 배열에 저장할 수 있는 요소의 개수를 나타냅니다.
+                                                   // 이 경우 array 배열은 'Z' - 'A' + 1, 즉 26개의 요소를 가집니다.
+                array[i] = (char)('A' + i); // 각 반복에서 array[i] = (char)('A' + i); 코드가 실행됩니다.
+                                            // (1) 'A' + i: 문자 'A'의 ASCII 값에 i 값을 더합니다,
+                                            // i는 0부터 25까지 반복되므로, 'A'부터 'Z'까지의 ASCII 값을 순서대로 생성합니다.
+                                            // 참고로 'A'는  ASCII 값으로 65입니다. 'Z'는 90.
+                                            // (2) (char)(...): 'A' + i 연산의 결과를 char 타입으로 형변환합니다,
+                                            //  ASCII 값을 문자로 변환하여, 배열에 저장하기 위해 형변환을 사용합니다.
+                                            // (3) array[i] = ...: 형변환된 문자를 array 배열의 i번째 요소에 저장합니다.
+                                            // 예를 들어, 두 번째 반복(i = 1)에서는 'A' + 1 = 'B'가 되어, array[1]에 'B'가 저장됨.
 
 
-            Console.WriteLine($"Number of dimensions : {scores.Rank}"); // scores 배열의 차원 수를 출력합니다.
-                                                                        // 1차원 배열이므로 1이 출력됩니다.
+            PrintArray(array[..]);    // array 배열의 모든 요소를 출력합니다.
+                                      // array[..]: array 배열의 모든 요소를 포함하는 슬라이스를 생성합니다, 
+                                      // ..는 범위 연산자로, 시작 인덱스와 끝 인덱스를 생략하면 배열의 처음부터 끝까지를 의미합니다.
+                                      // 0번째부터 마지막까지
+
+            PrintArray(array[5..]);   // array 배열의 5번째 요소부터 마지막 요소까지 출력합니다.
+                                      // array[5..]: array 배열의 5번째 요소부터 마지막 요소까지를 포함하는 슬라이스를 생성합니다.
+                                      // 5번째부터 끝까지
 
 
-            Console.WriteLine($"Binary Search : 81 is at " +
-                $"{Array.BinarySearch<int>(scores, 81)}"); // scores 배열에서 81을 이진(Binary) 검색하여 인덱스를 출력합니다.
-                                                           // Binary(이진) 검색은 배열의 중간 값을 확인하고,
-                                                           // 찾는 값보다 크면 오른쪽 절반, 작으면 왼쪽 절반을 다시 검색하는 방식으로
-                                                           // 빠르게 값을 찾는 알고리즘입니다.
-                                                           // 따라서 이진 검색은 배열이 정렬된 상태여야만 정확한 결과를 반환합니다.
+            Range range_5_10 = 5..10; // 5부터 10까지의 범위를 나타내는 range_5_10 변수를 선언합니다.
+
+            PrintArray(array[range_5_10]); // array 배열의 5번째 요소부터 9(10-1)번째 요소까지 출력합니다.
+                                           // array[range_5_10]: array 배열의 5번째 요소부터 9번째 요소까지를 포함하는 슬라이스를 생성합니다, 
+                                           // Range 타입을 사용하면 슬라이스의 범위를 명확하게 지정할 수 있습니다.
+                                           // 5번째부터 9(10-1)번째까지      
+
+            Index last = ^0; // 배열의 마지막 요소를 나타내는 last 변수를 선언합니다.
+                             // ^0: 인덱스 from end 연산자로, 배열의 마지막 요소를 나타냅니다.
+
+            Range range_5_last = 5..last; // 5부터 마지막 요소까지의 범위를 나타내는 range_5_last 변수를 선언합니다.
+           
+            
+            PrintArray(array[range_5_last]); // array 배열의 5번째 요소부터 마지막 요소(^)까지 출력합니다.
+                                             // array[range_5_last]: array 배열의 5번째 요소부터 마지막 요소까지를 포함하는 슬라이스를 생성합니다.
+                                             // 5번째부터 끝(^)까지      
 
 
-            Console.WriteLine($"Linear Search : 90 is at " +
-                $"{Array.IndexOf(scores, 90)}"); //  scores 배열에서 90을 선형 검색하여 인덱스를 출력합니다.
-
-
-            Console.WriteLine($"Everyone passed ? : " +
-                $"{Array.TrueForAll<int>(scores, CheckPassed)}"); // scores 배열의 모든 요소가 CheckPassed 메서드의 조건을 만족하는지 확인합니다.
-
-
-            int index = Array.FindIndex<int>(scores, (score) => score < 60); // scores 배열에서 60보다 작은 첫 번째 요소의 인덱스를 찾습니다,
-            scores[index] = 61; // 해당 인덱스의 값을 61로 변경합니다.
-
-
-            Console.WriteLine($"Everyone passed ? : " +
-                $"{Array.TrueForAll<int>(scores, CheckPassed)}"); // scores 배열의 모든 요소가 CheckPassed 메서드의 조건을 만족하는지 다시 확인합니다.
-                                                                  // TrueForAll() 메서드는 배열과 함께, 조건을 검사하는 메서드를 매개변수로 받습니다.
-
-            Console.WriteLine("Old length of scores : " +
-                $"{scores.GetLength(0)}"); // GetLength(0): scores 배열의 현재 길이를 출력합니다.
-
-
-            Array.Resize<int>(ref scores, 10); // scores 배열의 크기를 10으로 조정합니다.
-            Console.WriteLine($"New length of scores : {scores.Length}"); // 크기 조정 된 후 scores 배열의 길이를 출력합니다.
-
-
-            Array.ForEach<int>(scores, new Action<int>(Print)); // scores 배열의 각 요소에 대해 Print 메서드를 호출합니다.
-            Console.WriteLine();
-
-
-            Array.Clear(scores, 3, 7); //  scores 배열의 3번째 인덱스부터 7개의 요소를 0으로 초기화합니다.
-
-            Array.ForEach<int>(scores, new Action<int>(Print)); // scores 배열의 각 요소에 대해 Print 메서드를 호출합니다.
-            Console.WriteLine();
-
-
-            int[] sliced = new int[3]; //  3개의 정수를 저장할 수 있는 sliced 배열을 선언합니다.
-
-            Array.Copy(scores, 0, sliced, 0, 3); // scores 배열의 0번째 인덱스부터 3개의 요소를, sliced 배열의 0번째 인덱스부터 복사합니다.
-
-            Array.ForEach<int>(sliced, new Action<int>(Print)); // sliced 배열의 각 요소에 대해 Print 메서드를 호출합니다.
-            Console.WriteLine();
+            PrintArray(array[^4..^1]);  // array 배열의 끝에서 4번째 요소부터 끝에서 2번째 요소(^1)까지 출력합니다.
+                                        // array[^4..^1]: array 배열의 끝에서 4번째 요소부터 끝에서 2번째 요소까지를 포함하는 슬라이스를 생성합니다.
+                                        // 끝에서 4번째부터 끝(^)에서 2번째까지      
         }
     }
 }
 
-
 /*
 출력 결과
 
-80 74 81 90 34 
-34 74 80 81 90
-Number of dimensions : 1
-Binary Search : 81 is at 3
-Linear Search : 90 is at 4
-Everyone passed ? : False
-Everyone passed ? : True
-Old length of scores : 5
-New length of scores : 10
-61 74 80 81 90 0 0 0 0 0
-61 74 80 0 0 0 0 0 0 0
-61 74 80
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+FGHIJKLMNOPQRSTUVWXYZ
+FGHIJ
+FGHIJKLMNOPQRSTUVWXYZ
+WXY
  */
