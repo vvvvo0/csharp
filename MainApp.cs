@@ -1,77 +1,41 @@
 ﻿using System;
 
-
 /*
-추상 클래스:
-클래스처럼 구현된 프로퍼티를 가질 수 있는 한편,
-인터페이스처럼 구현되지 않은 프로퍼티(추상 프로퍼티)도 가질 수 있음
-
-추상 프로퍼티:
-파생 클래스에서 반드시 구현(재정의)해야 함
-abstract 한정자를 이용해서 선언
+배열:
+같은 성격을 가진 다량의 데이트를 한 번에 다뤄야 하는 경우에 유용함.
+데이터를 담는 상자와 같아서, 필요한 용량을 가진 배열을 만든 다음 여기에 데이터를 넣을 수 있음.
+예를 들어, 300개의 변수를 선언하는 대신, 300개의 용량을 가진 변수를 '한 개'만 선언해서 사용할 수 있음.
  */
 
-
-
-// 추상 클래스와 프로퍼티를 사용하는 방법을 보여줌
-namespace PropertiesInAbstractClass
+// 배열을 사용하여 5개의 점수를 저장하고, 점수의 평균을 계산하는 프로그램
+namespace ArraySample
 {
-
-    abstract class Product // 추상 클래스 Product
-    {
-        private static int serial = 0; // 정적 필드인 serial을 선언하고 0으로 초기화합니다.
-                                       // 이 필드는 모든 Product 객체에서 공유됩니다.
-
-
-        //추상 클래스는 구현을 가진 프로퍼티와 구현이 없는 추상 프로퍼티 모두를 가질 수 있음
-        public string SerialID // 구현을 가진 프로퍼티
-                               // 읽기 전용 프로퍼티 SerialID를 선언
-        {
-            get { return String.Format("{0:d5}", serial++); } // 일련번호를 생성하고 반환
-                                                              // serial++는 serial 값을 1 증가시킴
-        }
-
-        abstract public DateTime ProductDate // 구현이 없는 추상 프로퍼티 ProductDate를 선언
-                                             // 추상 프로퍼티는 파생 클래스에서 반드시 구현(재정의)해야 함
-                                             // 추상 프로퍼티 ProductDate는 DateTime 타입으로 날짜를 나타냄
-        {
-            get; 
-            set;
-        }
-    }
-
-
-    class MyProduct : Product // 파생 클래스 MyProduct
-    {
-        public override DateTime ProductDate // Product 클래스의 ProductDate 프로퍼티(추상 프로퍼티)를 재정의(구현)함
-                                             // 따라서 날짜를 가져오고 설정할 수 있도록 함
-        {
-            get;
-            set;
-        }
-    }
-
-
     class MainApp
     {
         static void Main(string[] args)
         {
-            Product product_1 = new MyProduct() // MyProduct 객체를 생성하고, ProductDate 프로퍼티를 초기화(즉, 날짜를 설정)
-            { ProductDate = new DateTime(2010, 1, 10) };
+            int[] scores = new int[5]; //  5개의 정수를 저장할 수 있는 scores라는 배열을 선언
+            scores[0] = 80; // 배열의 첫 번째 요소(scores[0])에 80을 할당.
+                            // 즉, 인덱스는 0부터 시작함.
+            scores[1] = 74;
+            scores[2] = 81;
+            scores[3] = 90;
+            scores[4] = 34;
+
+            foreach (int score in scores) // foreach 문을 사용하여 scores 배열의 각 요소를 순회합니다.
+                                          // 각 반복에서 score 변수에는 현재 요소의 값이 할당됨
+                Console.WriteLine(score); // score 변수의 값을 콘솔에 출력
 
 
-            Console.WriteLine("Product:{0}, Product Date :{1}",
-                product_1.SerialID,
-                product_1.ProductDate); // SerialID 프로퍼티와 ProductDate 프로퍼티를 사용하여, 제품 정보를 출력합니다.
+            int sum = 0; // 점수의 합을 저장할 sum 변수를 선언하고 0으로 초기화
+            foreach (int score in scores) // foreach 문을 사용하여 scores 배열의 각 요소를 순회
+                sum += score; // 각 반복에서 sum += score;는 sum 변수에 score 변수의 값을 더합니다.
 
+            int average = sum / scores.Length; // sum 변수를 배열의 길이(scores.Length)로 나누어 평균을 계산하고,
+                                               // average 변수에 저장
 
-            Product product_2 = new MyProduct() // MyProduct 객체를 생성하고, ProductDate 프로퍼티를 초기화
-            { ProductDate = new DateTime(2010, 2, 3) };
-
-
-            Console.WriteLine("Product:{0}, Product Date :{1}",
-                product_2.SerialID,
-                product_2.ProductDate); // SerialID 프로퍼티와 ProductDate 프로퍼티를 사용하여, 제품 정보를 출력합니다.
+            Console.WriteLine($"Average Score : {average}"); // 문자열 보간을 사용하여 "Average Score : " 문자열과
+                                                             // average 변수의 값을 결합하여 콘솔에 출력
         }
     }
 }
@@ -80,6 +44,10 @@ namespace PropertiesInAbstractClass
 /*
 출력 결과
 
-Product:00000, Product Date :2010-01-10 오전 12:00:00
-Product:00001, Product Date :2010-02-03 오전 12:00:00
+80
+74
+81
+90
+34
+Average Score : 71
  */
