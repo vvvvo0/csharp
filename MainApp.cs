@@ -1,35 +1,43 @@
 ﻿using System;
 
+
 /*
-배열:
-같은 성격을 가진 다량의 데이트를 한 번에 다뤄야 하는 경우에 유용함.
-데이터를 담는 상자와 같아서, 필요한 용량을 가진 배열을 만든 다음 여기에 데이터를 넣을 수 있음.
-예를 들어, 300개의 변수를 선언하는 대신, 300개의 용량을 가진 변수를 '한 개'만 선언해서 사용할 수 있음.
+인덱스 from end 연산자(^):
+^연산자는 컬렉션의 마지막부터 역순으로 인덱스를 지정하는 기능.
+
+^1: 배열(컬렉션)의 마지막 요소를 나타내는 인덱스
+^2: 마지막에서 두 번째 요소를 나타내는 인덱스
  */
 
-// 배열을 사용하여 5개의 점수를 저장하고, 점수의 평균을 계산하는 프로그램
-namespace ArraySample
+
+namespace ArraySample2
 {
     class MainApp
     {
         static void Main(string[] args)
         {
-            int[] scores = new int[5]; //  5개의 정수를 저장할 수 있는 scores라는 배열을 선언
-            scores[0] = 80; // 배열의 첫 번째 요소(scores[0])에 80을 할당.
-                            // 즉, 인덱스는 0부터 시작함.
+            int[] scores = new int[5]; // 5개의 정수를 저장할 수 있는 scores라는 배열을 선언
+
+            scores[0] = 80; // 배열의 첫 번째 요소(scores[0])에 80을 할당
             scores[1] = 74;
             scores[2] = 81;
-            scores[3] = 90;
-            scores[4] = 34;
 
-            foreach (int score in scores) // foreach 문을 사용하여 scores 배열의 각 요소를 순회합니다.
-                                          // 각 반복에서 score 변수에는 현재 요소의 값이 할당됨
+            scores[^2] = 90;  // 배열의 마지막-1
+                              // 배열의 마지막에서 두 번째 요소에 90을 할당합니다.
+            scores[^1] = 34;  // 배열의 마지막
+                              //  배열의 마지막 요소에 34를 할당합니다.
+
+
+            foreach (int score in scores) // foreach 문: scores라는 배열의 각 요소를
+                                          // 차례대로 score라는 변수에 담으면서 코드 실행.
+                                          // 각 반복에서 score 변수에는 현재 요소의 값이 할당됨.
                 Console.WriteLine(score); // score 변수의 값을 콘솔에 출력
 
 
             int sum = 0; // 점수의 합을 저장할 sum 변수를 선언하고 0으로 초기화
-            foreach (int score in scores) // foreach 문을 사용하여 scores 배열의 각 요소를 순회
+            foreach (int score in scores) // foreach 문을 사용하여 scores 배열의 각 요소를 순회함
                 sum += score; // 각 반복에서 sum += score;는 sum 변수에 score 변수의 값을 더합니다.
+
 
             int average = sum / scores.Length; // sum 변수를 배열의 길이(scores.Length)로 나누어 평균을 계산하고,
                                                // average 변수에 저장
@@ -39,7 +47,6 @@ namespace ArraySample
         }
     }
 }
-
 
 /*
 출력 결과
