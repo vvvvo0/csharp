@@ -3,56 +3,53 @@ using System.Collections;
 
 
 /*
-ArrayList:
-다양한 타입의 객체를 저장할 수 있는 동적 배열.
-배열과 달리, 컬렉션을 생성할 때 용량을 미리 지정할 필요 없이 자동으로 용량이 늘어나거나 줄어드는 게 장점.
-컬렉션 클래스 중 하나.
+Queue:
+선입선출(FIFO) 방식으로 데이터를 저장하는 자료 구조.
+즉, 먼저 들어간 데이터가 먼저 나오는 구조.
+프린터가 여러 문서를 출력할 때, 동영상 스트리밍 서비스에서 콘텐츠를 버퍼링할 때 등에 쓰임.
 
-컬렉션: 같은 성격을 띤 데이터의 모음을 담는 자료구조.
+
+컬렉션 vs 클래스?
+컬렉션:  여러 데이터를 모아서 저장하는 자료 구조. 배열, 리스트, 큐, 스택 등이 컬렉션에 속합니다.
+클래스: 객체 지향 프로그래밍에서 객체를 만들기 위한 틀. 객체의 속성과 메서드를 정의합니다.
+
+C#에서는 컬렉션을 구현하기 위해 클래스를 사용합니다.
+즉, 컬렉션은 클래스의 일종이지만, 모든 클래스가 컬렉션은 아닙니다.
+Queue는 컬렉션의 한 종류입니다.
+Queue 클래스는 선입선출(FIFO) 방식으로 데이터를 저장하는 컬렉션을 구현합니다.
+Queue는 큐 자료 구조(큐 컬렉션)를 구현한 클래스입니다.
  */
 
-namespace UsingList
+
+// Queue 컬렉션을 사용하는 방법
+namespace UsingQueue
 {
     class MainApp
     {
         static void Main(string[] args)
         {
-            ArrayList list = new ArrayList(); //  ArrayList 클래스의 인스턴스를 생성
-
-            // 요소 추가. Add() 메서드
-            for (int i = 0; i < 5; i++) // for 문을 사용하여 0부터 4까지의 정수를 list에 추가합니다.
-                list.Add(i); // list에 정수 i를 추가합니다.
-
-
-            foreach (object obj in list) // foreach 문을 사용하여 list의 모든 요소를 순회합니다.
-                Console.Write($"{obj} "); // 현재 요소를 출력합니다.
-            Console.WriteLine();
+            Queue que = new Queue(); // Queue 클래스의 인스턴스를 생성
+                                     // 'Queue는 클래스'이기 때문에, Queue 클래스의 기능을 사용하려면
+                                     // 먼저 Queue 클래스의 인스턴스를 생성해야 합니다.
+                                     // Queue 클래스의 인스턴스는 new Queue()와 같이 new 키워드를 사용하여 생성할 수 있습니다.
+                                     // Queue 클래스의 인스턴스를 생성하면, Enqueue(), Dequeue(), Peek(), Count 등
+                                     // Queue 클래스에서 제공하는 메서드와 프로퍼티를 사용하여 큐를 조작할 수 있습니다.
 
 
-            // 요소 삭제. RemoveAt() 메서드
-            list.RemoveAt(2); // list에서 인덱스 2의 요소를 삭제합니다.
-
-            foreach (object obj in list)
-                Console.Write($"{obj} ");
-            Console.WriteLine();
-
-
-            // 요소 삽입. Insert() 메서드
-            list.Insert(2, 2); // list의 인덱스 2에 정수 2를 삽입합니다.
-
-            foreach (object obj in list)
-                Console.Write($"{obj} ");
-            Console.WriteLine();
+            
+            que.Enqueue(1); // que에 정수 1을 추가합니다. 
+                            // Enqueue() 메서드: 큐의 맨 뒤에 요소를 추가합니다.
+            que.Enqueue(2);
+            que.Enqueue(3);
+            que.Enqueue(4);
+            que.Enqueue(5);
 
 
-            list.Add("abc"); // list에 문자열 "abc"를 추가합니다.
-            list.Add("def"); // list에 문자열 "def"를 추가합니다.
+            while (que.Count > 0) // que에 요소가 남아있는 동안 반복합니다.
+                                  // que.Count: que에 저장된 요소의 개수를 반환합니다.
 
-
-            for (int i = 0; i < list.Count; i++) // for 문을 사용하여 list의 모든 요소를 순회합니다.
-                                                 // list.Count는 list의 요소 개수를 반환합니다. 
-                Console.Write($"{list[i]} "); // 현재 요소를 출력합니다.
-            Console.WriteLine();
+                Console.WriteLine(que.Dequeue()); // que에서 맨 앞 요소를 제거하고 반환합니다.
+                                                  // Dequeue() 메서드: 큐의 맨 앞에서 요소를 제거하고 반환합니다.
         }
     }
 }
@@ -61,8 +58,9 @@ namespace UsingList
 /*
 출력 결과
 
-0 1 2 3 4 
-0 1 3 4 
-0 1 2 3 4 
-0 1 2 3 4 abc def 
-*/
+1
+2
+3
+4
+5
+ */
