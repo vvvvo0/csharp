@@ -1,100 +1,117 @@
 ﻿using System;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 /*
-일반화 클래스:
-데이터 형식을 일반화한 클래스.
-각 클래스가 데이터 형식만 빼고 다른 부분이 모두 같으면,
-형식 매개변수(T)를 이용해서 일반화할 수 있음.
+형식 매개변수(Type Parameter)의 조건에 제약 걸기
+: 일반화 메소드나 일반화 클래스가 입력받는 형식 매개변수 T는 '모든' 데이터 형식을 대신할 수 있다. 
+하지만 특정 조건을 갖춘 형식에만 대응하는 형식 매개변수가 필요할 때가 있다.
+이럴 때 형식 매개변수의 조건에 제약을 걸 수 있다.
+
+
+제약 조건의 종류?
+(1) where T : struct: 값 형식(struct) 제약 조건
+(2) where T : class: 참조 형식(class) 제약 조건
+(3) where T : new(): 매개변수 없는 생성자 제약 조건
+(4) where T : Base: 기본 클래스 제약 조건
+(5) where T : U: 타입 매개변수 제약 조건
+
+-> 제약 조건을 사용하면, 제네릭 타입 매개변수에 대한 제약을 설정하여 
+   타입 안전성을 확보하고 코드의 유연성을 높일 수 있습니다.
  */
 
 
-namespace Generic
+// 제네릭 타입 매개변수에 제약 조건을 설정하는 방법을 보여줍니다.
+// 제네릭은 타입을 매개변수로 사용하여 코드를 재사용할 수 있도록 하는 기능입니다. 
+// 제약 조건은 제네릭 타입 매개변수에 대해 특정 조건을 지정하여
+// 타입 안전성을 확보하고 코드의 유연성을 높입니다.
+namespace ConstraintsOnTypeParameters
 {
-    class MyList<T> // 제네릭 클래스 MyList<T> 선언
+    class StructArray<T> where T : struct // 값 형식(struct)만 허용하는 제네릭 클래스 StructArray<T> 입니다.
+                                          // T는 값 형식이어야 합니다.
     {
-        private T[] array; // T 타입의 배열 array 필드 선언
-
-        public MyList() // 생성자
+        public T[] Array { get; set; } // T 타입의 배열을 저장하는 프로퍼티입니다.
+        public StructArray(int size) // 생성자로,
         {
-            array = new T[3]; // array 필드를 초기 크기가 3인 배열로 초기화합니다.
-        }
-
-
-        public T this[int index] // 인덱서 정의 
-        {
-            get
-            {
-                return array[index]; // 인덱스에 해당하는 배열 요소 반환
-            }
-
-            set
-            {
-                if (index >= array.Length) // 인덱스가 배열 크기를 벗어나면
-                {
-                    Array.Resize<T>(ref array, index + 1); // 배열 크기 조정
-                    Console.WriteLine($"Array Resized : {array.Length}"); // 크기 조정 메시지 출력
-                }
-
-                array[index] = value; // 인덱스에 해당하는 배열 요소에 값 할당
-            }
-        }
-
-
-        public int Length // 배열의 길이를 반환하는 프로퍼티
-        {
-            get { return array.Length; } // array의 길이를 반환
+            Array = new T[size]; // size 크기의 T 타입 배열을 생성하여 Array 필드에 할당합니다.
         }
     }
 
+
+    class RefArray<T> where T : class // 참조 형식(class)만 허용하는 제네릭 클래스 RefArray<T> 입니다.
+                                      // T는 참조 형식이어야 합니다.
+    {
+        public T[] Array { get; set; } // T 타입의 배열을 저장하는 프로퍼티입니다.
+        public RefArray(int size) // 생성자로, 
+        {
+            Array = new T[size]; // size 크기의 T 타입 배열을 생성합니다.
+        }
+    }
+
+    class Base { }
+    class Derived : Base { }
+    class BaseArray<U> where U : Base // 제네릭 클래스 BaseArray<U>는 
+                                      // U 타입 매개변수가 Base 클래스 또는 Base 클래스에서 파생된 클래스여야 함
+    {
+        public U[] Array { get; set; } // U 타입의 배열을 저장하는 프로퍼티입니다.
+        public BaseArray(int size) // 생성자로, 
+        {
+            Array = new U[size]; // size 크기의 U 타입 배열을 생성합니다.
+        }
+
+        public void CopyyArray<T>(T[] Target) where T : U // Target 배열의 요소를 Array 배열에 복사하는 제네릭 메서드입니다. 
+                                                          // where T : U 제약 조건을 사용하여, 
+                                                          // T 타입 매개변수가 U 타입 매개변수와 같거나 
+                                                          // U 타입 매개변수에서 파생된 타입이어야 함을 지정합니다.
+
+        {
+            Target.CopyTo(Array, 0);
+        }
+    }
 
     class MainApp
     {
+        public static T CreateInstance<T>() where T : new() // T 타입의 객체를 생성하여 반환하는 메서드입니다. 
+                                                            // where T : new() 제약 조건을 사용하여,
+                                                            // T 타입 매개변수가 매개변수 없는 생성자를 가져야 함을 지정합니다.
+        {
+            return new T();
+        }
+
+
         static void Main(string[] args)
         {
-            MyList<string> str_list = new MyList<string>(); // 문자열(sting) 타입의 MyList 객체 str_list를 생성합니다.
-            str_list[0] = "abc"; // 인덱서를 사용하여 str_list 객체에 값 할당
-            str_list[1] = "def";
-            str_list[2] = "ghi";
-            str_list[3] = "jkl"; // 배열 크기가 3보다 크므로 자동으로 크기 조정
-            str_list[4] = "mno";
+            
+            StructArray<int> a = new StructArray<int>(3); 
+            // int 타입의 StructArray 객체를 생성합니다.
+            a.Array[0] = 0;
+            a.Array[1] = 1;
+            a.Array[2] = 2;
 
-            for (int i = 0; i < str_list.Length; i++) // for 문을 사용하여 str_list 객체의 모든 요소를 출력합니다.
-                Console.WriteLine(str_list[i]); // 문자열 배열 출력
 
-            Console.WriteLine();
+            RefArray<StructArray<double>> b = new RefArray<StructArray<double>>(3);
+            // StructArray<double> 타입의 RefArray 객체를 생성합니다.
+            b.Array[0] = new StructArray<double>(5);
+            b.Array[1] = new StructArray<double>(10);
+            b.Array[2] = new StructArray<double>(1005);
 
-            MyList<int> int_list = new MyList<int>(); // 정수(int) 타입의 MyList 객체 int_list를 생성합니다.
-            int_list[0] = 0; // 인덱서를 사용하여 int_list 객체에 값 할당
-            int_list[1] = 1;
-            int_list[2] = 2;
-            int_list[3] = 3; // 배열 크기가 3보다 크므로 자동으로 크기 조정
-            int_list[4] = 4;
 
-            for (int i = 0; i < int_list.Length; i++) // for 문을 사용하여 int_list 객체의 모든 요소를 출력합니다.
-                Console.WriteLine(int_list[i]); // 정수 배열 출력
+            BaseArray<Base> c = new BaseArray<Base>(3);
+            // Base 타입의 BaseArray 객체를 생성합니다.
+            c.Array[0] = new Base();
+            c.Array[1] = new Derived();
+            c.Array[2] = CreateInstance<Base>();
+
+
+            BaseArray<Derived> d = new BaseArray<Derived>(3);
+            // Derived 타입의 BaseArray 객체를 생성합니다.
+            d.Array[0] = new Derived(); // Base 형식은 여기에 할당 할 수 없다.
+            d.Array[1] = CreateInstance<Derived>();
+            d.Array[2] = CreateInstance<Derived>();
+
+            BaseArray<Derived> e = new BaseArray<Derived>(3);
+            // Derived 타입의 BaseArray 객체를 생성합니다.
+            e.CopyyArray<Derived>(d.Array); // 각 배열에 값을 할당하고,
+                                            // CopyyArray() 메서드를 사용하여 배열을 복사합니다.
         }
     }
 }
-
-
-/*
-출력 결과
-
-Array Resized : 4
-Array Resized : 5
-abc
-def
-ghi
-jkl
-mno
-
-Array Resized : 4
-Array Resized : 5
-0
-1
-2
-3
-4
- */
