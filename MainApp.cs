@@ -3,103 +3,60 @@ using System.Collections;
 
 
 /*
-인덱서(Indexer):
-인덱스를 이용해서 객체 내의 데이터에 접근하게 해주는 프로퍼티.
-객체를 마치 배열처럼 사용할 수 있게 해줌.
-(클래스의 인스턴스를 배열처럼 사용할 수 있도록 해주는 멤버입니다.)
+yield 키워드:
+반복기(Enumerator)를 생성하는 데 사용되며, foreach 문에서 사용할 수 있는 시퀀스를 생성합니다.
 
 
-프로퍼티 vs 인덱서?
-프로퍼티: 이름을 통해 객체 내의 데이터에 접근하게 해줌
-인덱서: 인덱스를 통해 객체 내의 데이터에 접근하게 해줌
+foreach 문 vs for 문?
+foreach 문은 for 문 보다 편하고 읽기 좋음.
+for 문처럼 요소의 위치를 위한 인덱스 변수를 선언하지 않아도 됨.
+세미콜론을 2개 넣지 않아도 되고, 조건문이나 증감식을 쓰지 않아도 됨.
+
+foreach 문은 배열이나 리스트 같은 컬렉션에서만 사용할 수 있음.
+foreach 문은 IEnumerable 인터페이스를 상속하는 형식만 직원함.
+따라서 IEnumerable 인터페이스를 상속하기만 하면 foreach 문을 이용해서 요소를 순회할 수 있음.
+IEnumerable 인터페이스가 갖고 있는 메서드는 IEnumerator GetEnumerator() 딱 한 개밖에 없음.
+
+GetEnumerator() 메서드는 IEnumerator 인터페이스를 상속하는 클래스의 객체를 반환해야 하는데,
+'yield 문'을 이용하면 IEnumerator를 상속하는 클래스를 따로 구현하지 않아도, 
+컴파일러가 자동으로 IEnumerator 인터페이스를 구현한 클래스를 생성해줍니다.
  */
 
 
-// 인덱서(Indexer)를 사용하여 MyList라는 클래스를 정의하고,
-// 이 클래스를 사용하여 '배열처럼 동작하는 객체'를 생성하는 프로그램.
-namespace Indexer
+// yield 키워드를 사용하여 반복기(Enumerator)를 구현하는 방법을 보여줌
+namespace Yield
 {
-
-    class MyList
+    class MyEnumerator
     {
-        private int[] array; // 정수형 배열을 저장할 array 필드를 선언합니다.
-                             // 이 필드는 private 한정자이므로 MyList 클래스 내부에서만 접근 가능합니다.
-
-        public MyList() // MyList 클래스의 생성자입니다.
-                        // 객체가 생성될 때 호출되며, array 필드를 초기 크기가 3인 배열로 초기화합니다.
-        {
-            array = new int[3]; // array 필드를 초기 크기가 3인 배열로 초기화
-        }
-
-
-        public int this[int index] // 인덱서를 선언합니다.
-                                   // public: 접근 제한자로, 이 인덱서에 어디서든 접근할 수 있음을 나타냅니다.
-                                   // int: 인덱서가 반환하는 값의 형식이 정수형(int)임을 나타냅니다.
-                                   // this: 인덱서를 나타내는 키워드입니다. 인덱서가 클래스의 멤버임을 나타내기 위해서 사용합니다.
-                                   // 인덱서는 클래스의 인스턴스를 통해 접근할 수 있으므로, 
-                                   // this 키워드를 사용하여 인덱서가 현재 인스턴스에 속해 있음을 명시적으로 나타냅니다.
-                                   // 즉, 인덱서를 선언할 때는 항상 this 키워드를 사용해야 합니다, 
-                                   // this 키워드를 생략하면 컴파일러는 인덱서를 일반 메서드로 인식합니다.
-                                   // 인덱서를 '일반 메서드'로 인식하게 되면, 인덱서의 고유한 기능을 사용할 수 없게 됩니다.
-                                   // 즉, "객체[인덱스]"와 같은 형태로 객체의 데이터에 접근할 수 없게 되고,
-                                   // "객체.메서드(인덱스)"와 같은 형태로 호출해야 합니다.
-                                   // 이는 인덱서의 직관적인 사용을 방해하고 코드의 가독성을 떨어뜨립니다.
-
-        // this 키워드는 현재 객체(인스턴스)를 나타내며, int index는 인덱서의 매개변수입니다.
-        // index는 정수형(int)이며, 배열의 인덱스처럼 사용됩니다.
-        // MyList 객체를 배열처럼 사용할 수 있도록 하는 인덱서를 선언하고,
-        // 인덱스를 통해 정수형 값에 접근할 수 있도록 합니다.
+        int[] numbers = { 1, 2, 3, 4 }; // 4개의 정수 값을 가진 numbers 배열을 선언하고 초기화합니다.
+        public IEnumerator GetEnumerator() // IEnumerator 인터페이스를 구현하는 GetEnumerator() 메서드를 정의합니다.
+                                           // GetEnumerator() 메서드: yield return 문을 사용하여 numbers 배열의 요소를 반환합니다.
+                                           // yield return 문: 
+                                           // 현재 메소드(GetEnumerator())의 실행을 일시 정지해놓고 호출자에게 결과를 반환합니다.
+                                           // 메소드가 다시 호출되면, 일시 정지된 실행을 복구하여 yield return 문 또는 yield break 문을
+                                           // 만날 때까지 나머지 작업을 실행합니다.
 
         {
-
-            get // get 접근자는 array[index]를 통해 인덱스에 해당하는 배열 요소(내부 데이터)를 '반환'함.
-            {
-                return array[index]; // 인덱스에 해당하는 배열 요소 반환
-            }
-
-
-            set // set 접근자는 array[index] = value를 통해 인덱스에 해당하는 배열 요소(내부 데이터)에 '값을 할당(저장)'합니다.
-            {
-                if (index >= array.Length) // index가 배열의 크기를 벗어나면 
-                {
-                    Array.Resize<int>(ref array, index + 1); // 배열의 크기를 index + 1로 조정합니다.
-                    Console.WriteLine($"Array Resized : {array.Length}"); // 크기 조정 메시지 출력
-                }
-
-                array[index] = value; // 인덱스에 해당하는 배열 요소에 값 할당
-            }
-        }
-
-        public int Length // array 필드(배열)의 길이를 반환하는 프로퍼티입니다.
-        {
-            get { return array.Length; }
+            yield return numbers[0]; // numbers 배열의 첫 번째 요소를 반환합니다.
+            yield return numbers[1]; // numbers 배열의 두 번째 요소를 반환합니다.
+            yield return numbers[2]; // numbers 배열의 세 번째 요소를 반환합니다.
+            yield break; // yield break문: 반복을 종료합니다.
+            yield return numbers[3]; // numbers 배열의 네 번째 요소를 반환합니다. 
+                                     // 이 문은 yield break; 때문에 실행되지 않습니다.
         }
     }
 
 
     class MainApp
     {
+
         static void Main(string[] args)
         {
-            MyList list = new MyList(); // MyList 클래스의 객체 list를 생성합니다.
+            var obj = new MyEnumerator(); // MyEnumerator 클래스의 객체 obj를 생성합니다.
 
-            for (int i = 0; i < 5; i++) // 첫 번째 for 문은 0부터 4까지 반복하며,
-                list[i] = i; // '객체[인덱스]' 형태로 list 객체에 값을 저장.
-                             // list[i]: MyList 클래스에서 정의한 인덱서를 사용하는 것입니다. 
-                             // 인덱서를 사용하면 객체를 배열처럼 사용할 수 있으므로,
-                             // list[0], list[1]과 같이 인덱스를 통해 값에 접근하여 저장할 수 있습니다.
-
-            for (int i = 0; i < list.Length; i++) // 두 번째 for 문은 0부터 list.Length - 1까지 반복하며,
-                Console.WriteLine(list[i]); // '객체[인덱스]' 형태로 list 객체에 저장된 값을 출력.
-                                            // 인덱서를 사용하여 list 객체의 각 요소에 접근하고, 
-                                            // Console.WriteLine()을 통해 값을 출력합니다.
-
-
-            // 인덱서를 사용한다는게 list[i]에서 i에 숫자를 넣는 다는 소리인가?
-            // 그렇다. list[i]에서 i에 숫자를 넣어서 배열처럼 사용하는 것이 인덱서를 사용하는 것이다.
-            // 마치 list라는 이름의 배열을 사용하는 것처럼 보이지만,
-            // 실제로는 MyList 클래스에서 정의한 인덱서를 통해 array라는 내부 배열에 접근하는 것이다.
-            // 예를 들어, list[0]은 array의 첫 번째 요소, list[1]은 array의 두 번째 요소에 접근하는 식입니다.
+            foreach (int i in obj) // obj 객체를 foreach 문에서 사용합니다.
+                                   // obj 객체는 GetEnumerator() 메서드를 통해 Enumerator(반복기)를 반환합니다.
+                Console.WriteLine(i); // 현재 요소를 출력합니다.
         }
     }
 }
@@ -108,40 +65,7 @@ namespace Indexer
 /*
 출력 결과
 
-Array Resized : 4
-Array Resized : 5
-0
 1
 2
 3
-4
 */
-
-/*
-인덱서를 선언할 때 this 키워드를 생략하면 컴파일러는 인덱서를 일반 메서드로 인식하게 되고, 이는 인덱서의 고유한 기능을 사용할 수 없게 됩니다.
-
-인덱서는 클래스의 인스턴스를 배열처럼 사용할 수 있도록 해주는 특별한 멤버입니다. 
-
-즉, "객체[인덱스]"와 같은 형태로 객체의 데이터에 접근할 수 있도록 해줍니다.
-
-만약 this 키워드를 생략하면, 컴파일러는 인덱서를 일반 메서드로 인식하고 "객체.메서드(인덱스)"와 같은 형태로 호출해야 합니다. 
-
-이는 인덱서의 직관적인 사용을 방해하고 코드의 가독성을 떨어뜨립니다.
-
-
-this 키워드는 다음과 같은 상황에서 사용됩니다.
-
-(1) 인스턴스 멤버 접근: 클래스의 인스턴스 메서드 또는 생성자 내에서 인스턴스 필드, 프로퍼티 또는 다른 메서드에 접근할 때 this 키워드를 사용합니다. 
-특히 메서드의 매개변수 이름과 클래스의 필드 이름이 같을 때, 필드와 매개변수를 구분하기 위해 this를 사용할 수 있습니다.
-
-(2) 생성자 오버로딩: this 키워드를 사용하여 같은 클래스 내의 다른 생성자를 호출할 수 있습니다. 이를 통해 코드 중복을 줄이고, 
-여러 생성자에서 공통적인 초기화 로직을 한 곳에 모을 수 있습니다.
-
-(3) 인덱서 선언: 인덱서를 선언할 때 this 키워드를 사용합니다. 이는 인덱서가 클래스의 인스턴스 멤버임을 나타냅니다.
-
-(4) 확장 메서드: 확장 메서드를 정의할 때 첫 번째 매개변수에 this 키워드를 사용합니다. 
-이는 확장 메서드가 어떤 클래스 또는 형식을 확장하는지 나타냅니다.
-
-this 키워드를 사용하는 이유는 코드의 가독성을 높이고, 인스턴스 멤버와 매개변수를 명확하게 구분하고, 
-코드 중복을 줄이고, 인덱서와 확장 메서드를 정의하기 위해서입니다.
- */
