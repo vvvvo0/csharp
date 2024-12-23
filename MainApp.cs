@@ -3,35 +3,36 @@ using System.Collections.Generic;
 
 
 /*
-Stack<T>:
-후입선출(LIFO) 방식으로 데이터를 저장하는 자료 구조.
-즉, 나중에 들어간 데이터가 먼저 나오는 구조입니다.
-<T>는 스택에 저장될 데이터의 형식을 나타내는 제네릭 타입 매개변수입니다.
+Dictionary<TKey, TValue>:
+키-값 쌍을 저장하는 컬렉션입니다. 
+각 요소는 키와 값으로 구성되며, 키를 사용하여 값에 접근할 수 있습니다.
+<TKey>는 키의 형식을 나타내는 제네릭 타입 매개변수이고, 
+<TValue>는 값의 형식을 나타내는 제네릭 타입 매개변수입니다. 
  */
 
 
-// Stack<T> 제네릭 컬렉션을 사용하는 방법을 보여줌.
-namespace UsingGenericStack
+// Dictionary<TKey, TValue> 컬렉션을 사용하여 키-값 쌍을 저장하고,
+// 키를 사용하여 값에 접근하는 방법을 보여줌.
+namespace UsingDictionary
 {
     class MainApp
     {
         static void Main(string[] args)
         {
-            Stack<int> stack = new Stack<int>(); // int형 데이터를 저장하는
-                                                 // Stack<int> 컬렉션 stack을 생성합니다.
+            Dictionary<string, string> dic = new Dictionary<string, string>(); // string형 키와 string형 값을 저장하는
+                                                                               // Dictionary<string, string> 컬렉션 dic를 생성합니다.
 
-            stack.Push(1); // stack에 정수 1을 추가합니다. 
-                           // Push() 메서드: 스택의 맨 위에 요소를 추가합니다.
-            stack.Push(2);
-            stack.Push(3);
-            stack.Push(4);
-            stack.Push(5);
+            dic["하나"] = "one"; // dic에 키 "하나"와, 값 "one"을 추가합니다.
+            dic["둘"] = "two";
+            dic["셋"] = "three";
+            dic["넷"] = "four";
+            dic["다섯"] = "five";
 
-            while (stack.Count > 0) // stack에 요소가 남아있는 동안 반복합니다. 
-                                    // stack.Count: stack에 저장된 요소의 개수를 반환합니다.
-                Console.WriteLine(stack.Pop()); // stack에서 맨 위 요소를 제거하고 반환합니다. 
-                                                // Pop() 메서드: 스택의 맨 위에서 요소를 제거하고 반환합니다. 
-                                                // Console.WriteLine() 메서드: 제거된 요소를 콘솔에 출력합니다.
+            Console.WriteLine(dic["하나"]); // dic에서 키 "하나"에 해당하는 값을 출력합니다.
+            Console.WriteLine(dic["둘"]);
+            Console.WriteLine(dic["셋"]);
+            Console.WriteLine(dic["넷"]);
+            Console.WriteLine(dic["다섯"]);
         }
     }
 }
@@ -40,9 +41,9 @@ namespace UsingGenericStack
 /*
 출력 결과
 
-5
-4
-3
-2
-1
- */
+one
+two
+three
+four
+five
+*/
