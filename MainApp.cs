@@ -2,126 +2,88 @@
 
 
 /*
-사용자 정의 예외 클래스:
-C#에서 모든 예외 객체는 System.Exception 클래스로부터 파생되어야 합니다.
-따라서 Exception 클래스를 상속하기만 하면 새로운 예외 클래스를 만들 수 있습니다.
+예외 필터(Exception Filter):
+catch 절이 받아들일 예외 객체에 제약 사항을 명시해서,
+해당 조건을 만족하는 예외 객체에 대해서만 예외 처리 코드를 실행할 수 있도록 함.
+catch() 절 뒤에 when 키워드를 이용해서 제약 조건을 기술하면 됨.
+when을 if라고 읽으면 이해하기 쉬움.
 
-사용 이유?
-.NET은 100개가 넘는 예외 형식을 제공하기 때문에 사용자 정의 예외는 자주 필요하진 않습니다.
-하지만 특별한 데이터를 담아서 예외 처리 루틴에 추가 정보를 제공하고 싶거나,
-예외 상황을 더 잘 설명하고 싶을 때 필요합니다.
+예외 필터링은 catch 블록에서 예외를 처리할지 여부를 결정하기 위해 조건을 추가하는 기능임.
+즉, 특정 조건을 만족하는 예외만 처리하고,
+그렇지 않은 예외는 다른 catch 블록이나 호출자에게 넘길 수 있음.
+
+장점?
+여러 catch 블록을 사용하지 않고도 다양한 조건에 따라 예외를 처리할 수 있음.
  */
 
 
-// 사용자 정의 예외 클래스를 사용하는 방법을 보여줌
-// InvalidArgumentException이라는 사용자 정의 예외 클래스를 정의하고,
-// MergeARGB 메서드에서 이 예외를 발생시킵니다.
-namespace MyException
+// 예외 필터링을 사용하는 방법을 보여줌.
+
+namespace ExceptionFiltering
 {
-    class InvalidArgumentException : Exception // Exception 클래스를 상속받아
-                                               // InvalidArgumentException이라는
-                                               // 사용자 정의 예외 클래스를 선언함.
-                                               // Argument 프로퍼티와 Range 프로퍼티를 추가하여
-                                               // 예외 정보를 저장합니다.
+    class FilterableException : Exception // Exception 클래스를 상속받아
+                                          // FilterableException이라는 사용자 정의 예외 클래스를 선언합니다.
+                                          // ErrorNo라는 정수형 프로퍼티를 정의하여 오류 번호를 저장합니다.
     {
-        public InvalidArgumentException() // 매개변수가 없는 생성자입니다.
-        {
-        }
-
-        public InvalidArgumentException(string message) 
-            : base(message) // 문자열 message를 매개변수로 받는 생성자입니다. 
-                            // base(message)를 호출하여, 기본 클래스의 생성자를 호출합니다.
-                            // 
-                            // 왜 base(message)를 호출하는가?
-                            // base(message)를 호출하여 기본 클래스의 생성자를 호출하면,
-                            // 사용자 정의 예외 클래스에서 예외 메시지를 사용할 수 있습니다.
-                            // Exception 클래스는 예외를 나타내는 '기본 클래스'이고, 
-                            // InvalidArgumentException 클래스는 Exception 클래스를 상속받은 '파생 클래스'.
-                            // InvalidArgumentException 클래스(파생 클래스)의 생성자에서,
-                            // base(message)를 호출하면,
-                            // Exception 클래스(기본 클래스)의 생성자를 호출하여 
-                            // 예외 메시지를 초기화합니다.
-                            // 즉, InvalidArgumentException 객체를 생성할 때,
-                            // 예외 메시지를 지정할 수 있도록 하는 것입니다.
-                            // 만약 base(message)를 호출하지 않으면, 
-                            // InvalidArgumentException 객체는 예외 메시지를 가지지 않게 됩니다.
-                            // 이처럼 base(message)를 호출하여 기본 클래스의 생성자를 호출하면, 
-                            // 사용자 정의 예외 클래스에서 예외 메시지를 사용할 수 있습니다.
-        {
-        }
-
-        public object Argument // 예외가 발생한 인자를 저장하는 프로퍼티입니다.
-        {
-            get;
-            set;
-        }
-
-        public string Range // 인자의 유효한 범위를 저장하는 프로퍼티입니다.
-        {
-            get;
-            set;
-        }
+        public int ErrorNo { get; set; }
     }
 
 
     class MainApp
     {
 
-        // MergeARGB() 메서드: alpha, red, green, blue 값을 입력으로 받아
-        // ARGB 색상 값을 반환하는 메서드입니다.
-        static uint MergeARGB(uint alpha, uint red, uint green, uint blue)
-        {
-            uint[] args = new uint[] { alpha, red, green, blue }; // alpha, red, green, blue 값을
-                                                                  // 배열 args에 저장합니다.
-
-            foreach (uint arg in args) // args 배열의 각 요소를 순회합니다.
-            {
-                if (arg > 255) // 만약 arg 값이 255보다 크면,
-                    throw new InvalidArgumentException() // InvalidArgumentException 예외를 발생시킵니다.
-                    {
-                        Argument = arg, // 예외가 발생한 인자를 Argument 프로퍼티에 저장합니다.
-                        Range = "0~255" // 인자의 유효한 범위를 Range 프로퍼티에 저장합니다.
-                    };
-            }
-
-            return (alpha << 24 & 0xFF000000) |
-                   (red << 16 & 0x00FF0000) |
-                   (green << 8 & 0x0000FF00) |
-                   (blue & 0x000000FF);// alpha, red, green, blue 값을 사용하여
-                                       // ARGB 색상 값을 계산하고 반환합니다.
-        }
-
-
-        // Main() 메서드: try-catch 문을 사용하여 
-        // InvalidArgumentException 예외를 처리하고, 예외 정보를 출력합니다.
         static void Main(string[] args)
         {
-            try // MergeARGB 메서드를 호출하여 ARGB 색상 값을 계산하고 출력합니다.
+            Console.WriteLine("Enter Number Between 0~10"); // 0에서 10 사이의 숫자를 입력하라는 메시지 출력
+            string input = Console.ReadLine(); // 사용자로부터 입력받은 문자열을 input 변수에 저장 
+
+            try // try 블록: 예외가 발생할 가능성이 있는 코드를 실행합니다.
             {
-                Console.WriteLine("0x{0:X}", MergeARGB(255, 111, 111, 111));
-                Console.WriteLine("0x{0:X}", MergeARGB(1, 65, 192, 128));
-                Console.WriteLine("0x{0:X}", MergeARGB(0, 255, 255, 300));
+                int num = Int32.Parse(input); // 입력받은 문자열(input)을 정수로 변환하여 num이라는 변수에 저장
+                                              // 만약 input이 숫자 형식이 아니면 FormatException 예외가 발생      
+
+                if (num < 0 || num > 10) // num이 0보다 작거나 10보다 크면,
+                    throw new FilterableException() { ErrorNo = num }; // FilterableException 예외를 발생시키고,
+                                                                       // ErrorNo 프로퍼티에 num 값을 저장
+                else // num이 0에서 10 사이의 값이면,
+                    Console.WriteLine($"Output : {num}"); // "Output : {num}"을 출력
             }
 
-            catch (InvalidArgumentException e) // InvalidArgumentException 예외가 발생하면,
-                                               // 예외 메시지와 함께
-                                               // Argument 프로퍼티와 Range 프로퍼티 값을 출력합니다.
+            catch (FilterableException e) when (e.ErrorNo < 0) // FilterableException 예외가 발생하고,
+                                                               // ErrorNo가 0보다 작으면,
             {
-                Console.WriteLine(e.Message);
-                Console.WriteLine($"Argument:{e.Argument}, Range:{e.Range}");
-
+                Console.WriteLine("Negative input is not allowed."); // "Negative input is not allowed." 메시지 출력
             }
 
+            catch (FilterableException e) when (e.ErrorNo > 10) // FilterableException 예외 발생 시,
+                                                                // ErrorNo가 10보다 크면,
+            {
+                Console.WriteLine("Too big number is not allowed."); // "Too big number is not allowed." 메시지 출력
+            }
         }
     }
 }
 
 
 /*
-출력 결과
+출력 결과(15 입력)
 
-0xFF6F6F6F
-0x141C080
-Exception of type 'MyException.InvalidArgumentException' was thrown.
-Argument:300, Range:0~255
+Enter Number Between 0~10
+15
+Too big number is not allowed.
 */
+
+/*
+출력 결과(-5 입력)
+
+Enter Number Between 0~10
+-5
+Negative input is not allowed.
+*/
+
+/*
+출력 결과(5 입력)
+
+Enter Number Between 0~10
+5
+Output : 5 */
