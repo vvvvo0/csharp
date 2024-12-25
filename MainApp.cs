@@ -2,109 +2,91 @@
 
 
 /*
-익명 메서드(anonymous method):
-이름이 없는 메서드.
-원래 메서드는 한정자가 없어도, 반환할 값이 없어도(coid), 매개변수가 없어도 괜찮지만 이름만은 있어야 함.
-익명 메서드를 참조할 대리자의 형식과 동일한 형식으로 선언되어야 함. 
-(동일한 매개변수 형식, 반환 형식)
+이벤트(Event):
+어떤 일이 생겼을 때 이를 알려주는 객체가 필요한 경우가 있음.
+이벤트는 이런 객체를 만들 때 사용.
+대리자(Delegate)를 event 한정자로 수식해서 만듦.
 
-익명 메서드의 장점?
-코드를 간결하게 작성할 수 있습니다.
-메서드를 정의할 필요 없이 델리게이트에 직접 코드를 전달할 수 있습니다.
+대리자(Delegate) vs 이벤트(Event)?
+이벤트는 public 한정자로 수식되어 있어도 자신이 선언된 클래스 외부에서는 호출이 불가능함.
+대리자는 public이나 internal 한정자로 수식되어 있으면 클래스 외부에서도 호출이 가능.
 
-언제 사용?
-대리자가 참조할 메서드를 넘겨야 할 때, 이 메서드가 두 번 다시 사용할 일이 없다고 판단되면 사용.
+이벤트(Event) 사용 이유?
+객체의 상태를 허위로 나타낼 수 있는 위험을 이벤트로 막을 수 있음.
+
+대리자: 콜백 용도로 사용(메서드에 대한 참조를 저장하고, 마치 메서드를 변수처럼 사용할 수 있도록 하는 형식)
+이벤트: 객체의 상태 변화를 일으키거나 사건의 발생을 알리는 용도로 사용
  */
 
 
-// 익명 메서드를 사용하여 델리게이트에 비교 로직을 전달하는 방법
-namespace AnonymouseMethod
+namespace EventTest
 {
-    delegate int Compare(int a, int b); // Compare라는 이름의 델리게이트를 선언
-                                        // 이 델리게이트는 두 개의 정수를 매개변수로 받아
-                                        // 정수 값을 반환하는 메서드를 참조할 수 있습니다.
+    // (1) 대리자를 선언합니다. 이 대리자는 클래스 밖에 선언 해도 되고 안에 선언해도 됩니다.
+    delegate void EventHandler(string message); // EventHandler라는 이름의 델리게이트를 선언합니다.
+                                                // 이 델리게이트는 문자열 매개변수를 하나 받고
+                                                // void를 반환하는 메서드를 참조할 수 있습니다.
 
+    class MyNotifier
+    {
+        // (2) 이벤트를 선언합니다.
+        // 선언한 대리자(EventHandler)의 인스턴스를 event 한정자로 수식해서, '클래스 내'에 선언합니다.
+        public event EventHandler SomethingHappened; // EventHandler 델리게이트 타입의 이벤트 SomethingHappened 선언
+
+
+        public void DoSomething(int number) // DoSomething() 메서드: 숫자를 입력받아 처리하는 메서드.
+                                            // 숫자를 입력받아
+                                            // 10으로 나눈 나머지가 0이 아니고 & 3으로 나누어 떨어지면
+                                            // SomethingHappened 이벤트를 발생시킵니다
+
+        {
+            int temp = number % 10; // number를 10으로 나눈 나머지를 temp에 저장
+
+            if (temp != 0 && temp % 3 == 0) // temp가 0이 아니고 3으로 나누어 떨어지면
+            {
+                SomethingHappened(String.Format("{0} : 짝", number)); // SomethingHappened 이벤트 발생
+            }
+        }
+    }
 
     class MainApp
     {
-        static void BubbleSort(int[] DataSet, Compare Comparer) // BubbleSort 메서드:
-                                                                // 정수형 배열 DataSet과 Compare 델리게이트 Comparer를 매개변수로 받습니다.
-                                                                // 버블 정렬 알고리즘을 사용하여 DataSet 배열을 정렬합니다.
-                                                                // Comparer 델리게이트를 사용하여 두 요소를 비교합니다.
-                                                                // Comparer(DataSet[j], DataSet[j + 1]) > 0이면 두 요소의 순서를 바꿉니다.
+        // (3) 이벤트 핸들러를 작성합니다. 대리자(EventHandler)의 형식과 동일한 메서드면 됩니다.
+        static public void MyHandler(string message) // MyHandler() 메서드: 이벤트 처리 메서드입니다.
+                                                     // message를 콘솔에 출력합니다.
+                                                     // SomethingHappened 이벤트에서 사용할 이벤트 핸들러(MyHandler)는,
+                                                     // 대리자(EventHandler)의 형식과 동일한 형식.
         {
-            int i = 0; // <벨로그: delegate 사용하여 정렬> 참고!
-            int j = 0;
-            int temp = 0;
-
-            for (i = 0; i < DataSet.Length - 1; i++)
-            {
-                for (j = 0; j < DataSet.Length - (i + 1); j++)
-                {
-                    if (Comparer(DataSet[j], DataSet[j + 1]) > 0)
-                    {
-                        temp = DataSet[j + 1];
-                        DataSet[j + 1] = DataSet[j];
-                        DataSet[j] = temp;
-                    }
-                }
-            }
+            Console.WriteLine(message);
         }
+
 
         static void Main(string[] args)
         {
-            int[] array = { 3, 7, 4, 2, 10 }; // 정수형 배열 array를 선언하고 초기화합니다.
+            // (4) 클래스의 인스턴스를 생성하고, 이 인스턴스의 이벤트에 이벤트 핸들러를 등록합니다.
+            MyNotifier notifier = new MyNotifier(); // MyNotifier 인스턴스를 생성
+            notifier.SomethingHappened += new EventHandler(MyHandler); // SomethingHappened 이벤트에 MyHandler() 메서드를
+                                                                       // 이벤트 핸들러로 추가(등록)합니다.
 
-            Console.WriteLine("Sorting ascending...");
-            BubbleSort(array, delegate (int a, int b) // BubbleSort 메서드를 호출하여 array 배열을 오름차순으로 정렬합니다.
-                                                      // 두 번째 인자로 익명 메서드(delegate (int a, int b))를 전달합니다. 
-                                                      // 익명 메서드(delegate (int a, int b))는
-                                                      // Compare 델리게이트와 동일한 매개변수 형식, 반환 형식를 가지며, 
-                                                      // 두 개의 정수를 비교하여 오름차순 정렬을 위한 비교 로직을 제공합니다.
+            // (5) 이벤트가 발생하면 이벤트 핸들러(MyHandler())가 호출됩니다.
+            for (int i = 1; i < 30; i++) // 1부터 29까지의 숫자를 DoSomething 메서드에 전달
             {
-                if (a > b)
-                    return 1;
-                else if (a == b)
-                    return 0;
-                else
-                    return -1;
-            });
-
-
-            for (int i = 0; i < array.Length; i++) // for 문을 사용하여 정렬된 array 배열을 출력합니다.
-                Console.Write($"{array[i]} ");
-
-
-            int[] array2 = { 7, 2, 8, 10, 11 }; // 정수형 배열 array2를 선언하고 초기화합니다.
-            Console.WriteLine("\nSorting descending...");
-            BubbleSort(array2, delegate (int a, int b) // BubbleSort 메서드를 호출하여 array2 배열을 내림차순으로 정렬합니다. 
-                                                       // 두 번째 인자로 익명 메서드를 전달합니다.
-                                                       // 익명 메서드는 Compare 델리게이트와 동일한 매개변수 형식, 반환 형식를 가지며,
-                                                       // 두 개의 정수를 비교하여 내림차순 정렬을 위한 비교 로직을 제공합니다.
-            {
-                if (a < b)
-                    return 1;
-                else if (a == b)
-                    return 0;
-                else
-                    return -1;
-            });
-
-
-            for (int i = 0; i < array2.Length; i++) // for 문을 사용하여 정렬된 array2 배열을 출력합니다.
-                Console.Write($"{array2[i]} ");
-
-            Console.WriteLine();
+                notifier.DoSomething(i);
+            }
         }
     }
 }
 
 
 /*
-출력 결과
+실행 결과
 
-Sorting ascending...
-2 3 4 7 10 
-Sorting descending...
-11 10 8 7 2 
+3 : 짝
+6 : 짝
+9 : 짝
+13 : 짝
+16 : 짝
+19 : 짝
+23 : 짝
+26 : 짝
+29 : 짝
 */
