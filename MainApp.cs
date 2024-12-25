@@ -2,107 +2,109 @@
 
 
 /*
-일반화 대리자(Generic Delegate):
-대리자(Delegate)는 일반화(Generic) 메서드도 참조할 수 있습니다.
-이 때 대리자는 일반화 메서드를 참조할 수 있도록, 형식 매개변수를 이용하여 선언해야 합니다.  
+Delegate Chains(대리자 체인):
+여러 개의 메서드를 하나의 델리게이트에 연결하여 순차적으로 호출할 수 있도록 하는 기능.
+
+대리자는 메소드의 참조인데,
+대리자 하나가 메소드 여러 개를 동시에 참조할 수 있다.
  */
 
 
-// 제네릭 델리게이트(일반화 대리자)를 사용하여 버블 정렬 알고리즘을 구현하고,
-// '다양한 타입'의 배열을 오름차순과 내림차순으로 정렬하는 방법을 보여줌
-namespace GenericDelegate
+
+namespace DelegateChains
 {
+    delegate void Notify(string message); // Notify라는 이름의 대리자를 선언합니다. 
+                                          // 이 대리자는 문자열 매개변수를 하나 받고
+                                          // void를 반환하는 메서드를 참조할 수 있습니다.
 
-    delegate int Compare<T>(T a, T b); // Compare<T>라는 이름의 일반화 대리자(제네릭 델리게이트)를 선언합니다. 
-                                       // 이 델리게이트는 두 개의 T 타입 매개변수를 받아
-                                       // 정수 값을 반환하는 메서드를 참조할 수 있습니다.
+    class Notifier // Notify 대리자의 인스턴스인 EventOccured를 가지는 클래스 Notifier 선언
+    {
+        public Notify EventOccured; // EventOccured라는 Notify 델리게이트 타입의 이벤트를 선언합니다.
+                                    // 이 이벤트는 특정 상황이 발생했을 때 다른 객체에 알리는 데 사용됩니다.
+    }
 
+
+    class EventListener
+    {
+        private string name; // EventListener 객체의 이름을 저장할 name이라는 필드 선언
+
+        public EventListener(string name) // 생성자
+        {
+            this.name = name; // name 필드 초기화
+        }
+
+        public void SomethingHappend(string message) // 이벤트 발생 시 호출될 메서드 
+                                                     // 이 메서드는 이벤트 메시지를 콘솔에 출력합니다.
+        {
+            Console.WriteLine($"{name}.SomethingHappened : {message}");
+        }
+    }
 
 
     class MainApp
     {
-
-        // AscendCompare() 메서드 일반화 버전
-        static int AscendCompare<T>(T a, T b) where T : IComparable<T> // AscendCompare<T> 메서드:
-                                                                       // 오름차순 정렬을 위한 비교 메서드.
-                                                                       // 두 개의 T 타입 매개변수 a와 b를 비교하여,
-                                                                       // a가 b보다 크면 양수, 같으면 0, 작으면 음수를 반환합니다.
-                                                                       // where T : IComparable<T> 제약 조건:
-                                                                       // T 타입이 IComparable<T> 인터페이스를 구현해야 함을 나타냅니다. 
-                                                                       // IComparable<T> 인터페이스:
-                                                                       // 객체를 비교하는 CompareTo() 메서드를 정의합니다.
-                                                                       // 갑자기 IComparable<T> 인터페이스가 왜 나옴?
-                                                                       // (그리고 AscendCompare() 메서드가 IComparable<T>를 상속하는 a 객체의
-                                                                       // CompareTo() 메서드를 호출해서 그 결과를 호출?)
-                                                                       // 모든 수치 형식과 System.string은 IComparable을 상속해서
-                                                                       // CompareTo() 메서드를 구현하고 있기 때문에 바로 나올 수 있음.
-                                                                       // CompareTo() 메서드: 매개변수가 자신보다 크면 -1, 같으면 0, 작으면 1을 반환합니다.
-                                                                       // 따라서 AscendCompare() 메서드가 a.CompareTo(b)를 호출하면,
-                                                                       // 오름차순 정렬에 필요한 비교 결과를 얻을 수 있습니다.
-        {
-            return a.CompareTo(b);
-        }
-
-
-        // DescendCompare() 메서드 일반화 버전
-        static int DescendCompare<T>(T a, T b) where T : IComparable<T> // DescendCompare<T> 메서드:
-                                                                        // 내림차순 정렬을 위한 비교 메서드.
-                                                                        // 두 개의 T 타입 매개변수 a와 b를 비교하여,
-                                                                        // a가 b보다 작으면 양수, 같으면 0, 크면 음수를 반환합니다. 
-        {
-            return a.CompareTo(b) * -1; // a.CompareTo(b) * -1를 통해 AscendCompare<T> 메서드의 결과를 반전시켜,
-                                        // 내림차순 정렬을 구현합니다.
-        }
-
-
-        // BubbleSort() 메서드 일반화 버전. 형식 매개변수만 추가되면 됨.
-        static void BubbleSort<T>(T[] DataSet, Compare<T> Comparer) // BubbleSort<T> 메서드:
-                                                                    // T 타입의 배열 DataSet과 Compare<T> 델리게이트 Comparer를 매개변수로 받습니다.
-                                                                    // 버블 정렬 알고리즘을 사용하여 DataSet 배열을 정렬합니다.
-                                                                    // Comparer 델리게이트를 사용하여 두 요소를 비교합니다.
-                                                                    // Comparer(DataSet[j], DataSet[j + 1]) > 0이면 두 요소의 순서를 바꿉니다.
-        {
-            int i = 0;
-            int j = 0;
-            T temp;
-
-            for (i = 0; i < DataSet.Length - 1; i++)
-            {
-                for (j = 0; j < DataSet.Length - (i + 1); j++)
-                {
-                    if (Comparer(DataSet[j], DataSet[j + 1]) > 0)
-                    {
-                        temp = DataSet[j + 1];
-                        DataSet[j + 1] = DataSet[j];
-                        DataSet[j] = temp;
-                    }
-                }
-            }
-        }
-
-
         static void Main(string[] args)
         {
-            int[] array = { 3, 7, 4, 2, 10 }; // 정수형 배열 array를 선언하고 초기화합니다.
+            Notifier notifier = new Notifier(); // Notifier 클래스의 객체를 생성
+            EventListener listener1 = new EventListener("Listener1"); // EventListener 클래스의 생성자를 호출하여 
+                                                                      // EventListener 클래스의 객체를 생성하고,
+                                                                      // listener1이라는 변수에 그 객체를 저장함.
+                                                                      // 괄호안에 인수를 넣는 이유?
+                                                                      // EventListener 클래스의 생성자는 string name이라는 매개변수를 가지고 있습니다.
+                                                                      // 즉, EventListener 객체를 생성할 때 문자열 값을 전달해야 합니다. 
+                                                                      // 이 문자열 값은 EventListener 객체의 name 필드에 저장됩니다.
+                                                                      // 이 코드에서는 "Listener1"이라는 문자열을 생성자의 인자로 전달합니다. 
+                                                                      // 따라서 listener1 객체의 name 필드에는 "Listener1"이라는 값이 저장됩니다.
+            EventListener listener2 = new EventListener("Listener2");
+            EventListener listener3 = new EventListener("Listener3");
 
-            Console.WriteLine("Sorting ascending...");
-            BubbleSort<int>(array, new Compare<int>(AscendCompare)); // BubbleSort<int> 메서드를 호출하여 
-                                                                     // array 배열을 오름차순으로 정렬합니다.
 
-            for (int i = 0; i < array.Length; i++)
-                Console.Write($"{array[i]} ");
-
-
-            string[] array2 = { "abc", "def", "ghi", "jkl", "mno" }; // 문자열 배열 array2를 선언하고 초기화합니다.
-
-            Console.WriteLine("\nSorting descending...");
-            BubbleSort<string>(array2, new Compare<string>(DescendCompare)); // BubbleSort<string> 메서드를 호출하여
-                                                                             // array2 배열을 내림차순으로 정렬합니다.
-
-            for (int i = 0; i < array2.Length; i++)
-                Console.Write($"{array2[i]} ");
+            // += 연산자를 이용한 체인 만들기
+            notifier.EventOccured += listener1.SomethingHappend; // += 연산자를 사용하여, EventListener 객체의 SomethingHappend 메서드를
+                                                                 // notifier.EventOccured 대리자에 추가합니다.
+                                                                 // 이렇게 하면 notifier.EventOccured 이벤트가 발생했을 때, 
+                                                                 // 추가된 모든 메서드가 순차적으로 호출됩니다.
+                                                                 // listener1의 SomethingHappend 메서드를 EventOccured 이벤트에 추가
+            notifier.EventOccured += listener2.SomethingHappend; // listener2의 SomethingHappend 메서드를 EventOccured 이벤트에 추가
+            notifier.EventOccured += listener3.SomethingHappend;
+            notifier.EventOccured("You've got mail."); // notifier.EventOccured 델리게이트를 호출함.
+                                                       // 체인에 연결된 모든 메서드가 호출됩니다.
+                                                       // EventOccured 이벤트 발생
 
             Console.WriteLine();
+
+
+            // -=연산자를 이용한 체인 끊기
+            notifier.EventOccured -= listener2.SomethingHappend; // EventListener 객체의 SomethingHappend 메서드를
+                                                                 // notifier.EventOccured 델리게이트에서 제거
+            notifier.EventOccured("Download complete.");
+
+            Console.WriteLine();
+
+
+            // +, = 연산자를 이용한 체인 만들기
+            notifier.EventOccured = new Notify(listener2.SomethingHappend)
+                                  + new Notify(listener3.SomethingHappend); // + 연산자를 사용하여 델리게이트를 결합
+            notifier.EventOccured("Nuclear launch detected.");
+
+            Console.WriteLine();
+
+            Notify notify1 = new Notify(listener1.SomethingHappend);
+            Notify notify2 = new Notify(listener2.SomethingHappend);
+
+
+            // Delegate.Combine() 메서드를 이용한 체인 만들기
+            notifier.EventOccured =
+                (Notify)Delegate.Combine(notify1, notify2);
+            notifier.EventOccured("Fire!!");
+
+            Console.WriteLine();
+
+
+            // Delegate.Remove() 메서드를 이용한 체인 끊기
+            notifier.EventOccured =
+                (Notify)Delegate.Remove(notifier.EventOccured, notify2);
+            notifier.EventOccured("RPG!");
         }
     }
 }
@@ -111,8 +113,18 @@ namespace GenericDelegate
 /*
 출력 결과
 
-Sorting ascending...
-2 3 4 7 10 
-Sorting descending...
-mno jkl ghi def abc 
+Listener1.SomethingHappened : You've got mail.
+Listener2.SomethingHappened : You've got mail.
+Listener3.SomethingHappened : You've got mail.
+
+Listener1.SomethingHappened : Download complete.
+Listener3.SomethingHappened : Download complete.
+
+Listener2.SomethingHappened : Nuclear launch detected.
+Listener3.SomethingHappened : Nuclear launch detected.
+
+Listener1.SomethingHappened : Fire!!
+Listener2.SomethingHappened : Fire!!
+
+Listener1.SomethingHappened : RPG!
 */
