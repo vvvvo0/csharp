@@ -2,67 +2,122 @@
 
 
 /*
- 대리자(delegate):
-메서드에 대한 참조.
-대리자에 메소드의 주소를 할당한 후, 대리자를 호출하면 대리자가 메소드를 호출해줌.
-
-델리게이트의 장점?
-메서드를 변수처럼 저장하고 전달할 수 있습니다.
-메서드를 동적으로 호출할 수 있습니다.
-콜백 함수를 구현하는 데 사용할 수 있습니다.
+delegate 왜, 언제 사용?
+'값'이 아닌 '코드' 자체를 매개변수에 넘기고 싶을 때 사용.
  */
 
 
-// 대리자(delegate)를 사용하여 메서드를 참조하고 호출하는 방법
-namespace Delegate
+// 델리게이트를 사용하여 버블 정렬 알고리즘을 구현하고, 오름차순과 내림차순으로 정렬하는 방법
+// Comparer 델리게이트를 통해 정렬 방식을 동적으로 변경할 수 있다
+namespace UsingCallback
+
 {
-    delegate int MyDelegate(int a, int b); // delegate 키워드를 사용하여,
-                                           // MyDelegate라는 이름의 델리게이트를 선언.
-                                           // 델리게이트는 인스턴스가 아닌 형식(Type)임,
-                                           // 따라서 메소드를 참조하는 무엇을 만드려면
-                                           // MyDelegate라는 델리게이트의 인스턴스를 따로 만들어야 함.
-                                           // MyDelegate 델리게이트는 두 개의 정수형 '매개변수'를 받고,
-                                           // 정수형 값을 '반환'하는 "메서드를 참조"할 수 있습니다.
 
-
-    // 대리자의 반환 형식과 매개변수를 따르는 메서드를 선언해야 대리자가 참조할 수 있음. 
-    class Calculator
-    {
-        public int Plus(int a, int b) // Plus(): 두 정수를 더하는 '인스턴스 메서드' 
-                                      // 인스턴스 메서드(static으로 한정x):
-                                      // 인스턴스를 생성해야만 호출가능한 메서드
-        {
-            return a + b;
-        }
-
-        public static int Minus(int a, int b) // Minus(): 두 정수를 빼는 '정적 메서드'
-                                              // 정적 메서드(static으로 한정o):
-                                              // 인스턴스를 생성안해도 호출가능한 메서드
-        {
-            return a - b;
-        }
-    }
+    delegate int Compare(int a, int b); // Compare라는 이름의 델리게이트를 선언합니다.
+                                        // 이 델리게이트는 두 개의 정수를 매개변수로 받아
+                                        // 정수 값을 반환하는 메서드를 참조할 수 있습니다.
 
 
     class MainApp
     {
+        static int AscendCompare(int a, int b) // AscendCompare():
+                                               // Compare 대리자가 참조할 비교 메서드.
+                                               // 두 개의 정수 a와 b를 비교하여,
+                                               // a가 b보다 크면 1, 같으면 0, 작으면 -1을 반환합니다.
+                                               // 오름차순 정렬을 위한 비교 메서드입니다.
+        {
+            if (a > b)
+                return 1;
+            else if (a == b)
+                return 0;
+            else
+                return -1;
+        }
+
+        static int DescendCompare(int a, int b) // DescendCompare():
+                                                // Compare 대리자가 참조할 비교 메서드.
+                                                // 내림차순 정렬을 위한 비교 메서드입니다.
+
+        {
+            if (a < b)
+                return 1;
+            else if (a == b)
+                return 0;
+            else
+                return -1;
+        }
+
+
+        // Comparer 델리게이트를 통해 정렬 방식을 동적으로 변경할 수 있다.
+        static void BubbleSort(int[] DataSet, Compare Comparer) // BubbleSort(): 정렬을 위한 메서드
+                                                                // 정수형 배열 타입의 DataSet과,
+                                                                // Compare 델리게이트 타입의 Comparer를
+                                                                // 매개변수로 받아,
+                                                                // 버블 정렬 알고리즘을 사용하여 DataSet 배열을 정렬합니다.
+                                                                // Comparer 델리게이트를 사용하여 두 요소를 비교합니다.
+                                                                // Comparer(DataSet[j], DataSet[j + 1]) > 0이면
+                                                                // 두 요소의 순서를 바꿉니다.
+
+        {
+            int i = 0; // i: 바깥쪽 반복문 카운터 변수
+            int j = 0; // j: 안쪽 반복문의 카운터 변수
+            int temp = 0; // temp: 두 요소의 값을 교환할 때 사용되는 임시 변수
+
+
+            for (i = 0; i < DataSet.Length - 1; i++) // 배열의 크기 - 1만큼 반복합니다.
+            {
+                for (j = 0; j < DataSet.Length - (i + 1); j++) // 배열의 크기 - (i + 1)만큼 반복합니다.
+                                                               // i가 증가할수록 안쪽 반복문의 횟수가 줄어들게 했는데,
+                                                               // 바깥쪽 반복문을 한 번 돌 때마다
+                                                               // 가장 큰 값이 배열의 마지막으로 이동하기 때문임.
+                {
+                    if (Comparer(DataSet[j], DataSet[j + 1]) > 0) // Comparer 델리게이트를 사용하여
+                                                                  // DataSet[j]와 DataSet[j + 1] 요소를 비교합니다.
+                                                                  // Comparer는 AscendCompare() 또는 DescendCompare() 메서드를 참조하며,
+                                                                  // 이 메서드들은 두 요소를 비교하여 순서를 판별합니다.
+                                                                  // 만약 Comparer의 반환 값이 0보다 크면, 
+                                                                  // 즉 두 요소의 순서가 잘못되었으면
+                                                                  // temp 변수를 사용하여 두 요소의 값을 교환합니다.
+
+                    {
+                        temp = DataSet[j + 1];
+                        DataSet[j + 1] = DataSet[j];
+                        DataSet[j] = temp;
+                    }
+                }
+            }
+        }
+
+
         static void Main(string[] args)
         {
-            Calculator Calc = new Calculator(); // Calculator 클래스의 인스턴스인 Calc 생성
-                                                // 인스턴스 메서드인 Puls() 메서드 사용하려면 필요함
-            
-            MyDelegate Callback; // (1) MyDelegate 델리게이트 타입의 변수인 Callback을 선언 
+            int[] array = { 3, 7, 4, 2, 10 }; // 정수형 배열 array를 선언하고 초기화합니다.
 
-            Callback = new MyDelegate(Calc.Plus); // 생성한 인스턴스(Calc)를 통해야만 호출 가능한 Plus() 메서드 
-            Console.WriteLine(Callback(3, 4)); 
+            Console.WriteLine("Sorting ascending...");
+            BubbleSort(array, new Compare(AscendCompare)); // BubbleSort 메서드를 호출하여
+                                                           // array 배열을 오름차순으로 정렬합니다. 
+                                                           // new Compare(AscendCompare):
+                                                           // 'AscendCompare ()메서드를 참조'하는 Compare 델리게이트를 생성합니다.
+                                                           //
+                                                           // BubbleSort 메서드를 호출할 때,
+                                                           // array 배열과, AscendCompare 메서드를 참조하는 Compare 델리게이트를 전달합니다.
 
-            Callback = new MyDelegate(Calculator.Minus); // (2) MyDelegate () 생성자를 호출해서 Callback 인스턴스(객체)를 생성
-                                                         // -> 생성자 인수는 Minus() 메서드를 사용
-                                                         // -> Callback은 Minus() 메서드를 참조함
-            Console.WriteLine(Callback(7, 5)); // (3) 메서드를 호출하듯 대리자를 호출하면, 참조하고 있는 메서드가 실행됨.
-                                               // 즉, Calllback을 호출하면 Callback은
-                                               // 현재 자신이 참조하는 주소에 있는 메서드(Minus())의 코드를 실행하고,
-                                               // 그 결과(숫자 2)를 호출자에게 반환함
+
+            for (int i = 0; i < array.Length; i++) // for 문을 사용하여 정렬된 array 배열을 출력합니다.
+                Console.Write($"{array[i]} ");
+
+
+            int[] array2 = { 7, 2, 8, 10, 11 }; // 정수형 배열 array2를 선언하고 초기화합니다.
+            Console.WriteLine("\nSorting descending..."); 
+            BubbleSort(array2, new Compare(DescendCompare)); // BubbleSort 메서드를 호출하여
+                                                             // array2 배열을 내림차순으로 정렬합니다.
+                                                             // new Compare(DescendCompare):
+                                                             // 'DescendCompare() 메서드를 참조'하는 Compare 델리게이트를 생성합니다.
+
+            for (int i = 0; i < array2.Length; i++) // for 문을 사용하여 정렬된 array2 배열을 출력합니다.
+                Console.Write($"{array2[i]} ");
+
+            Console.WriteLine();
         }
     }
 }
@@ -71,6 +126,8 @@ namespace Delegate
 /*
 출력 결과
 
-7
-2
- */
+Sorting ascending...
+2 3 4 7 10 
+Sorting descending...
+11 10 8 7 2 
+*/
