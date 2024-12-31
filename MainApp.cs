@@ -1,72 +1,59 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 
 /*
-Attribute(애트리뷰트):
-코드에 대한 부가 정보를 기록하고 읽을 수 있는 기능입니다.
-애트리뷰트를 이용해서 클래스나 구조체, 메서드, 프로퍼티 등에 데이터를 기록해두면,
-C# 컴파일러나 C#으로 작성된 프로그램이 이 정보를 읽고 사용할 수 있습니다.
+CallerInfo 애트리뷰트:
+호출자 정보(Caller Information) 애트리뷰트입니다.
+호출자 정보는 메서드의 매개변수에 사용되며, 
+메서드의 호출자 이름, 호출자 메서드가 정의된 소스 파일 경로, 심지어 소스 파일 내 행 번호까지 알 수 있습니다.
+(C/C++의 __FILENAME__, __LINE__, __FUNCTION__ 매크로에 해당하는 기능입니다.)
+이를 이용해서 응용 프로그램의 이벤트를 로그 파일이나 화면에 출력하면,
+그 이벤트가 어떤 코드에서 일어났는지 알 수 있습니다.
 
-Attribute vs 주석:
-주석이 사람이 작성하고 사람이 읽는 정보라면,
-애트리뷰트는 사람이 작성하고 컴퓨터가 읽는 정보다.
-
-Metadate(메타데이터):
-데이터의 데이터를 말합니다.
-C# 코드도 데이터지만 이 코드에 대한 정보도 존재하는데, 이 정보를 메타데이터라고 합니다.
-따라서 애트리뷰트나 리플렉션을 통해 얻는 정보들은 C# 코드의 메타데이터라고 할 수 있습니다.
-
-Obsolete 애트리뷰트:
-메서드, 클래스, 프로퍼티 등에 적용하여 해당 요소가 더 이상 사용되지 않거나, 
-향후 버전에서 제거될 예정임을 나타냅니다.
-.NET에서 기본적으로 제공하는 애트리뷰트입니다.
-
-Obsolete 애트리뷰트의 용도:
-더 이상 사용되지 않는 코드를 표시하여 개발자에게 알립니다.
-향후 버전에서 제거될 예정인 코드를 표시하여 개발자가 미리 대비할 수 있도록 합니다.
-Obsolete 애트리뷰트를 사용하면 코드의 가독성과 유지보수성을 높일 수 있습니다.
+호출자 정보 애트리뷰트 3개
+(1) CallerMemberName: 현재 메서드를 '호출한 멤버(메서드 또는 프로퍼티)의 이름'을 나타냅니다.
+(2) CallerFilePath: 현재 메서드가 '호출된 소스 파일 경로'를 나타냅니다. 
+                    이때 경로는 소스 코드를 컴파일할 때의 전체 경로를 나타냅니다. 
+(3) CallerLineNumber: 현재 메서드가 '호출된 소스 파일 내의 행 번호'를 나타냅니다.
  */
 
 
-// 애트리뷰트 사용하기
-// Obsolete 애트리뷰트를 사용하여 메서드가 더 이상 사용되지 않음을 나타내는 방법.
-// 프로그래머가 OldMethod()를 사용하는 코드를 그대로 둔 채 컴파일 하면,
-// "OldMethod는 폐기되었습니다. NewMethod()를 이용하세요."라는 경고 메시지를 보게 됩니다.
-// 컴파일 할 때 비주얼 스튜디오의 [오류 목록] 창을 확인하면 경고 메시지가 있는 것을 확인할 수 있습니다.
-namespace BasicAttribute
+// 호출자 정보 애트리뷰트(Caller Info 애트리뷰트)를 사용하여 호출자 정보를 출력하는 방법 
+namespace CallerInfo
 {
-    class MyClass
+    public static class Trace // Trace라는 이름의 정적 클래스를 정의합니다.
     {
-        // 애트리뷰트를 사용할 떄는 설명하려는 코드 요소 앞에 대괄호 []를 붙이고,
-        // 그 안에 애트리뷰트의 이름을 넣으면 됩니다.
-        [Obsolete("OldMethod는 폐기되었습니다. NewMethod()를 이용하세요.")]
-        public void OldMethod()
-        {
-            Console.WriteLine("I'm old");
-        }
+        public static void WriteLine(string message, // WriteLine 메서드를 정의합니다.
+                                                     // string message: 출력할 메시지를 나타냅니다.
 
-        public void NewMethod()
+            [CallerFilePath] string file = "", // 호출자 파일 경로를 나타내는 선택적 매개변수입니다.
+                                               // CallerFilePath 애트리뷰트는
+                                               // 컴파일러에게 호출자 파일 경로를 제공하도록 지시합니다.
+            [CallerLineNumber] int line = 0, // 호출자 줄 번호를 나타내는 선택적 매개변수입니다.
+                                             // CallerLineNumber 애트리뷰트는
+                                             // 컴파일러에게 호출자 줄 번호를 제공하도록 지시합니다.
+            [CallerMemberName] string member = "") // 호출자 멤버 이름을 나타내는 선택적 매개변수입니다.
+                                                   // CallerMemberName 애트리뷰트는 
+                                                   // 컴파일러에게 호출자 멤버 이름을 제공하도록 지시합니다.
         {
-            Console.WriteLine("I'm new");
+            Console.WriteLine(
+                $"{file}(Line:{line}) {member}: {message}"); // 호출자 정보와 메시지를 결합하여 콘솔에 출력합니다.
         }
     }
+
 
     class MainApp
     {
-        static void Main(string[] args)
+        static void Main(string[] args) 
         {
-            MyClass obj = new MyClass();
-
-            obj.OldMethod();
-            obj.NewMethod();
+            Trace.WriteLine("즐거운 프로그래밍!"); // Trace 클래스의 WriteLine 메서드를 호출합니다.
+                                                   // Trace.WriteLine() 메서드의 선언부를 보면.
+                                                   // [CallerFilePath], [CallerLineNumber], [CallerMemberName]이
+                                                   // 선택적 인수로 사용되고 있는데, 이렇게 하면
+                                                   // Trace.WriteLine() 메서드를 호출할 때,
+                                                   // 호출자 정보 애트리뷰트로 수식한 매개변수는 프로그래머가 별도로
+                                                   // 입력하지 않아도 됩니다.
         }
     }
 }
-
-
-/*
-출력 결과
-
-I'm old
-I'm new
- */
