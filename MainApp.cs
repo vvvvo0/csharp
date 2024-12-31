@@ -1,103 +1,87 @@
 ﻿using System;
-using Excel = Microsoft.Office.Interop.Excel;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using Microsoft.Scripting; // 동적 언어 런타임(DLR)을 위한 네임스페이스
+using Microsoft.Scripting.Hosting; // DLR 호스팅 API를 위한 네임스페이스
+using IronPython.Hosting; // IronPython을 사용하기 위한 네임스페이스
 
 
 /*
- COM과 .NET 사이의 상호 운용성을 위한 dynamic 형식.
-COM은 메서드가 결과를 반환할 때 실제 형식이 아닌 object 형식으로 반환합니다. 이 때문에 C# 코드에서는
-이 결과를 실제 형식으로 변환해줘야 하는 번거로움이 있었습니다. 이를 C# 4.0에 dynamic 형식의 도입을 통해 해결했습니다.
-dynamic 형식은 런타임에 타입 검사를 수행하는 형식입니다. 따라서 dynamic 형식의 변수에 COM 객체를 할당하면,
-컴파일 시점에 COM 객체의 타입을 알 필요가 없습니다.
+DLR(Dynamic Language Runtime):
+CLR 위에서 동작하며, 파이썬이나 루비 같은 동적 언어를 .NET 플랫폼에서 실행할 수 있습니다.
+파이썬이나 루비 같은 동적 언어의 코드에서 만들어진 객체에,
+C#이나 VB 같은 정적 언어의 코드에서 접근할 수 있게 해줍니다.
+(즉, C# 코드에서 직접 파이썬이나 루비 코드를 실행하고 결과를 받아볼 수 있습니다.)
+DLR API를 기반으로 구현된 동적 언어라도 호스팅(Hosting) 할 수 있습니다.
+(즉, 파이썬을 쭉 사용하다가 파이썬에는 없는 라이브러리가 루비에 있는 경우,
+바로 루비 라이브러리를 이용하는 코드를 호스팅할 수 있습니다.)
 
-마이크로소프트는 워드, 엑셀, 파워포인트 등 오피스 제품들의 기능을 코드에서 이용할 수 있도록,
-이들을 COM 컴포넌트로 구성해놨습니다.
 
-C#을 비롯한 .NET 언어들은 RCW(Runtime Callable Wrapper)를 통해 COM 컴포넌트를 사용할 수 있습니다.
+dynamic 형식:
+COM과 .NET의 상호 운영성 문제에 사용했던 dynamic을, 
+CLR과 DLR 사이의 상호 운용성 문제를 해결하는 데 사용할 수 있습니다.
+왜냐하면 미리 형식 검사를 할 수 없는 동적 형식 언어에서 만들어진 객체를,
+C#의 dynamic 형식이 받아낼 수 있기 때문입니다.
 
-RCW(Runtime Callable Wrapper):
-RCW는 COM에 대한 프록시 역할을 함으로써, C# 코드에서 .NET 클래스 라이브를 사용하듯 COM API를 사용할 수 있게 해줍니다.
-(즉, 프로그래머는 RCW를 통해 C# 코드에서 COM 컴포넌트가 가지고 있는 API들을 호출할 수 있습니다.)
-RCW(Runtime Callable Wrapper)는 .NET이 제공하는 Type Libraray Importer(tlbomp.exe)를 이용해서 만들 수 있는데,
-비주얼 스튜디오를 사용해서 COM 객체를 프로젝트 참조에 추가하면 IDE가 자동으로 tlbomp.exe를 호출해서 RCW를 만들어줍니다.
 
-COM:
-COM은 COmponent Object Model의 약자로, 마이크로소프트의 소프트웨어 컴포넌트 규격을 말합니다.
-OLE, ActiveX, COM+와 같은 파생 규격들이 모두 COM을 바탕으로 만들어졌습니다.
+DLR 나온 배경:
+CLR(Common Language Runtime)은 IL(Intermediate Language)로 컴파일할 수 있는 언어들은 지원하지만,
+동적 언어(Python, Ruby처럼 실행할 때 코드를 해석해서 실행하는 방식의 언어)는 지원할 수 없었습니다.
+그래서 마이크로소프트는 동적 언어를 실행할 수 있도록 하는 플랫폼인 DLR(Dynamic Language Runtime)을 선보였습니다.
+
+
+DLR이 제공하는 클래스들:
+(1) ScriptRuntime
+(2) ScriptScope
+(3) ScriptEngine
+(4) ScriptSource
+(5) CompiledCode
  */
 
 
-// COM 인터페이스를 사용하여 Excel 파일을 생성하는 두 가지 방법
-namespace COMInterop
+// IronPython 엔진(별도로 설치해야 함)을 사용하여 Python 코드를 C#에서 실행
+namespace WithPython
 {
     class MainApp
     {
-        public static void OldWay(string[,] data, string savePath) // OldWay 메서드 정의
-
-        {
-            Excel.Application excelApp = new Excel.Application(); // Excel Application 객체 생성
-
-            excelApp.Workbooks.Add(Type.Missing); // 새 워크북 추가, Type.Missing은 선택적 인수를 생략할 때 사용
-
-            Excel.Worksheet workSheet = (Excel.Worksheet)excelApp.ActiveSheet; // 활성 시트를 Worksheet 객체로 가져오기
-
-            for (int i = 0; i < data.GetLength(0); i++) // 데이터 배열의 행 개수만큼 반복
-            {
-                ((Excel.Range)workSheet.Cells[i + 1, 1]).Value2 = data[i, 0]; // 엑셀 셀에 값 할당
-                ((Excel.Range)workSheet.Cells[i + 1, 2]).Value2 = data[i, 1]; // 엑셀 셀에 값 할당
-            }
-
-            workSheet.SaveAs(savePath + "\\shpark-book-old.xlsx", // 엑셀 파일 저장
-                Type.Missing, // 파일 형식 지정 (생략)
-                Type.Missing, // 암호 지정 (생략)
-                Type.Missing, // 쓰기 보호 암호 지정 (생략)
-                Type.Missing, // 읽기 전용으로 저장할지 여부 지정 (생략)
-                Type.Missing, // 파일 형식에 대한 추가 정보 지정 (생략)
-                Type.Missing, // 파일을 저장할 때 충돌을 처리하는 방법 지정 (생략)
-                Type.Missing, // 파일을 저장할 때 파일 속성을 설정하는 방법 지정 (생략)
-                Type.Missing); // 파일을 저장할 때 파일 속성을 설정하는 방법 지정 (생략)
-
-            excelApp.Quit(); // 엑셀 종료
-        }
-
-        public static void NewWay(string[,] data, string savePath) // NewWay 메서드 정의
-        {
-            Excel.Application excelApp = new Excel.Application(); // Excel Application 객체 생성
-
-            excelApp.Workbooks.Add(); // 새 워크북 추가
-
-            Excel._Worksheet workSheet = (Excel._Worksheet)excelApp.ActiveSheet; // 활성 시트를 _Worksheet 객체로 가져오기
-
-            for (int i = 0; i < data.GetLength(0); i++) // 데이터 배열의 행 개수만큼 반복
-            {
-                workSheet.Cells[i + 1, 1] = data[i, 0]; // 엑셀 셀에 값 할당
-                workSheet.Cells[i + 1, 2] = data[i, 1]; // 엑셀 셀에 값 할당
-            }
-
-            workSheet.SaveAs(savePath + "\\shpark-book-dynamic.xlsx"); // 엑셀 파일 저장
-            excelApp.Quit(); // 엑셀 종료
-        }
-
         static void Main(string[] args)
         {
-            string savePath = System.IO.Directory.GetCurrentDirectory(); // 현재 디렉토리 경로 가져오기
-            string[,] array = new string[,] // 문자열 2차원 배열 선언 및 초기화
-            {
-                { "뇌를 자극하는 알고리즘",       "2009" },
-                { "뇌를 자극하는 C# 4.0",         "2011" },
-                { "뇌를 자극하는 C# 5.0",         "2013" },
-                { "뇌를 자극하는 파이썬 3",       "2016" },
-                { "그로킹 딥러닝",                "2019" },
-                { "이것이 C#이다",                "2018" },
-                { "이것이 C#이다 2E",             "2020" },
-                { "이것이 자료구조+알고리즘이다", "2022" },
-                { "이것이 C#이다 3E",             "2023" },
-            };
+            ScriptEngine engine = Python.CreateEngine(); // IronPython 엔진 생성
+            ScriptScope scope = engine.CreateScope(); // Python 코드 실행을 위한 스코프 생성
+            scope.SetVariable("n", "박상현"); // 스코프에 변수 n을 "박상현"으로 설정
+            scope.SetVariable("p", "010-123-4566"); // 스코프에 변수 p를 "010-123-4566"으로 설정
 
-            Console.WriteLine("Creating Excel document in old way...");
-            OldWay(array, savePath); // OldWay 메서드 호출
+            ScriptSource source = engine.CreateScriptSourceFromString( // Python 코드를 문자열로부터 생성
+                @"
+class NameCard : // NameCard 클래스 정의
+    name = '' // name 필드 초기화
+    phone = '' // phone 필드 초기화
 
-            Console.WriteLine("Creating Excel document in new way...");
-            NewWay(array, savePath); // NewWay 메서드 호출
+    def __init__(self, name, phone) :  // 생성자
+        self.name = name  // name 필드에 매개변수 name 값 할당
+        self.phone = phone // phone 필드에 매개변수 phone 값 할당
+
+    def printNameCard(self) : // 이름과 전화번호를 출력하는 메서드
+        print self.name + ', ' + self.phone  // name과 phone 필드 값 출력
+
+NameCard(n, p) // NameCard 객체 생성
+");
+            dynamic result = source.Execute(scope); // Python 코드 실행하고,
+                                                    // 결과를 result 변수에 저장합니다.
+                                                    // dynamic 키워드는 런타임에 타입 검사를 수행합니다.
+            result.printNameCard(); // result 객체의 printNameCard 메서드 호출
+
+            Console.WriteLine("{0}, {1}", result.name, result.phone); // result 객체의 name과 phone 필드 값 출력
         }
     }
 }
+
+
+/*
+출력 결과
+
+박상현, 010-123-4566
+박상현, 010-123-4566
+ */
