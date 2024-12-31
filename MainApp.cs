@@ -1,74 +1,64 @@
 ﻿using System;
-using System.Reflection;
-using System.Reflection.Emit;
 
 
 /*
-리플렉션 이밋(Reflection Emit):
-리플렉션을 이용하여 프로그램 실행 중에(=동적으로=런타임에) 새로운 형식을 만들어낼 수 있는 기능.
-프로그램이 실행 중에 만들어낸 새 형식을 CLR의 메모리에 내보내는 것.
-런타임에 IL(Intermediate Language) 코드를 생성하여, 새로운 어셈블리, 모듈, 타입, 메서드를 동적으로 생성하는 기능
+Attribute(애트리뷰트):
+코드에 대한 부가 정보를 기록하고 읽을 수 있는 기능입니다.
+애트리뷰트를 이용해서 클래스나 구조체, 메서드, 프로퍼티 등에 데이터를 기록해두면,
+C# 컴파일러나 C#으로 작성된 프로그램이 이 정보를 읽고 사용할 수 있습니다.
+
+Attribute vs 주석:
+주석이 사람이 작성하고 사람이 읽는 정보라면,
+애트리뷰트는 사람이 작성하고 컴퓨터가 읽는 정보다.
+
+Metadate(메타데이터):
+데이터의 데이터를 말합니다.
+C# 코드도 데이터지만 이 코드에 대한 정보도 존재하는데, 이 정보를 메타데이터라고 합니다.
+따라서 애트리뷰트나 리플렉션을 통해 얻는 정보들은 C# 코드의 메타데이터라고 할 수 있습니다.
+
+Obsolete 애트리뷰트:
+메서드, 클래스, 프로퍼티 등에 적용하여 해당 요소가 더 이상 사용되지 않거나, 
+향후 버전에서 제거될 예정임을 나타냅니다.
+.NET에서 기본적으로 제공하는 애트리뷰트입니다.
+
+Obsolete 애트리뷰트의 용도:
+더 이상 사용되지 않는 코드를 표시하여 개발자에게 알립니다.
+향후 버전에서 제거될 예정인 코드를 표시하여 개발자가 미리 대비할 수 있도록 합니다.
+Obsolete 애트리뷰트를 사용하면 코드의 가독성과 유지보수성을 높일 수 있습니다.
  */
 
-namespace EmitTest
+
+// 애트리뷰트 사용하기
+// Obsolete 애트리뷰트를 사용하여 메서드가 더 이상 사용되지 않음을 나타내는 방법.
+// 프로그래머가 OldMethod()를 사용하는 코드를 그대로 둔 채 컴파일 하면,
+// "OldMethod는 폐기되었습니다. NewMethod()를 이용하세요."라는 경고 메시지를 보게 됩니다.
+// 컴파일 할 때 비주얼 스튜디오의 [오류 목록] 창을 확인하면 경고 메시지가 있는 것을 확인할 수 있습니다.
+namespace BasicAttribute
 {
-    public class MainApp
+    class MyClass
     {
-        public static void Main()
+        // 애트리뷰트를 사용할 떄는 설명하려는 코드 요소 앞에 대괄호 []를 붙이고,
+        // 그 안에 애트리뷰트의 이름을 넣으면 됩니다.
+        [Obsolete("OldMethod는 폐기되었습니다. NewMethod()를 이용하세요.")]
+        public void OldMethod()
         {
-            // (1) 에셈블리를 만듭니다.
-            // AssemblyBuilder 클래스를 이용해야하지만, AssemblyBuilder는 스스로를 생성하는 생성자가 없습니다.
-            // 따라서 다른 팩토리 클래스의 도움을 받아야 합니다.
-            // DefineDynamicAssembly() 메서드를 호출하면 AssemblyBuilder의 인스턴스를 만들 수 있습니다.
-            // "CalculatorAssembly"라는 이름의 동적 어셈블리를 생성합니다.
-            AssemblyBuilder newAssembly =
-                AssemblyBuilder.DefineDynamicAssembly( 
-                    new AssemblyName("CalculatorAssembly"), AssemblyBuilderAccess.Run);
+            Console.WriteLine("I'm old");
+        }
 
+        public void NewMethod()
+        {
+            Console.WriteLine("I'm new");
+        }
+    }
 
-            // (2) 모듈을 만듭니다.
-            // AssemblyBuilder는 동적 모듈을 생성하는 DefineDynamicModule() 메서드를 가지고 있으므로,
-            // 이 메서드를 호출해서 모듈을 만들면 됩니다.
-            // "Calculator"라는 이름의 모듈을 만듭니다.
-            ModuleBuilder newModule = newAssembly.DefineDynamicModule("Calculator");
+    class MainApp
+    {
+        static void Main(string[] args)
+        {
+            MyClass obj = new MyClass();
 
-            // (3) 클래스를 만듭니다.
-            // ModuleBuilder의 DefineType() 메서드를 이용해서 클래스를 생성합니다.
-            // "SumTo100"이라는 이름의 클래스를 만듭니다.
-            TypeBuilder newType = newModule.DefineType("Sum1To100");
-
-
-            // (4) 메서드를 만듭니다.
-            // TypeBuilder 클래스의 DefineMethod() 메서드를 호출해서,
-            // "Calculate()" 라는 이름의 메서드를 만듭니다.
-            // Calculate() 메서드의 접근성은 Public이며, 반환 형식은 int, 매개변수는 없습니다.
-            MethodBuilder newMethod = newType.DefineMethod(
-                "Calculate",
-                MethodAttributes.Public,
-                typeof(int),    // 반환 형식
-                new Type[0]);   // 매개 변수
-
-
-            // (5) 앞에서 생성한 것이 메서드이므로, 메서드가 실행할 코드(IL 명령어)를 채워 넣습니다.
-            // 이 작업은 ILGenerator 객체를 통해 이루어집니다.
-            // MethodBuilder 클래스의 GetILGenerator() 메서드를 통해 ILGenerator 객체를 얻을 수 있습니다.
-            ILGenerator generator = newMethod.GetILGenerator();
-
-            generator.Emit(OpCodes.Ldc_I4, 1); // 32비트 정수(1)를 계산 스택에 넣습니다.
-
-            for (int i = 2; i <= 100; i++)
-            {
-                generator.Emit(OpCodes.Ldc_I4, i); // 32비트 정수(i)를 계산 스택에 넣습니다.
-                generator.Emit(OpCodes.Add); // 계산 후 계산 스택에 담겨 있는 두 개의 값을 꺼내서 더한 후,
-                                             // 그 결과를 다시 계산 스택에 넣습니다.
-            }
-
-            generator.Emit(OpCodes.Ret); // 계산 스택에 담겨 있는 값을 반환합니다.
-            newType.CreateType();
-
-            object sum1To100 = Activator.CreateInstance(newType);
-            MethodInfo Calculate = sum1To100.GetType().GetMethod("Calculate");
-            Console.WriteLine(Calculate.Invoke(sum1To100, null));
+            obj.OldMethod();
+            obj.NewMethod();
         }
     }
 }
@@ -77,5 +67,6 @@ namespace EmitTest
 /*
 출력 결과
 
-5050
+I'm old
+I'm new
  */
