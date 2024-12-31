@@ -1,120 +1,103 @@
 ﻿using System;
+using Excel = Microsoft.Office.Interop.Excel;
 
 
 /*
-dynamic 형식:
-데이터 형식임.
-다만 형식 검사를 하는 시점이 프로그램 실행 중입니다.
-(즉, dynamic 형식으로 선언하면 형식 검사를 실행할 때로 미룹니다.)
+ COM과 .NET 사이의 상호 운용성을 위한 dynamic 형식.
+COM은 메서드가 결과를 반환할 때 실제 형식이 아닌 object 형식으로 반환합니다. 이 때문에 C# 코드에서는
+이 결과를 실제 형식으로 변환해줘야 하는 번거로움이 있었습니다. 이를 C# 4.0에 dynamic 형식의 도입을 통해 해결했습니다.
+dynamic 형식은 런타임에 타입 검사를 수행하는 형식입니다. 따라서 dynamic 형식의 변수에 COM 객체를 할당하면,
+컴파일 시점에 COM 객체의 타입을 알 필요가 없습니다.
 
-duck typing(덕 타이핑):
-'OOP'에서는 C#에서 어떤 형식이 오리(Duck)라고 인정 받으려면, 그 형식의 조상 중에 오리가 있어야 합니다.
-반면, '덕 타이핑'에서 어떤 형식이 오리로 인정받으려면, 오리처럼 걷고, 오리처럼 헤엄치고, 오리처럼 꽉꽉거리기만 하면 됩니다.
-그 형식이 어느 형식으로부터 상속받는지는 중요하지 않습니다.
+마이크로소프트는 워드, 엑셀, 파워포인트 등 오피스 제품들의 기능을 코드에서 이용할 수 있도록,
+이들을 COM 컴포넌트로 구성해놨습니다.
 
-덕 타이핑 사용하는 이유?
-인터페이스 상속을 사용해도 비슷한 일을 할 수 있지만,
-인터페이스를 설계하기 위해서는 추상화를 잘해야 하는데, 추상화를 잘하기 쉽지 않습니다.
-인터페이스를 잘못 설계했다가 나중에 파생 클래스를 수정해야 할 일이 생기면,
-위로는 인터페이스를 수정하고, 아래로는 자신의 파생 클래스들, 옆으로는 형제 클래스들을 줄줄이 수정해야 하는 일이 생깁니다.
-'덕 타이핑'은 이런 문제를 좀 더 유연하게 해결할 수 있도록 돕습니다.
-'덕 타이핑'은 상속 관계를 이용하지 않기 때문에 프로그램의 동작에 관여한느 부분만 손을 대면 되기 때문입니다.
+C#을 비롯한 .NET 언어들은 RCW(Runtime Callable Wrapper)를 통해 COM 컴포넌트를 사용할 수 있습니다.
 
-덕 타이핑의 장점:
-코드의 유연성을 높일 수 있습니다.
-객체 간의 결합도를 낮출 수 있습니다.
-다양한 타입의 객체를 동일한 방식으로 처리할 수 있습니다.
+RCW(Runtime Callable Wrapper):
+RCW는 COM에 대한 프록시 역할을 함으로써, C# 코드에서 .NET 클래스 라이브를 사용하듯 COM API를 사용할 수 있게 해줍니다.
+(즉, 프로그래머는 RCW를 통해 C# 코드에서 COM 컴포넌트가 가지고 있는 API들을 호출할 수 있습니다.)
+RCW(Runtime Callable Wrapper)는 .NET이 제공하는 Type Libraray Importer(tlbomp.exe)를 이용해서 만들 수 있는데,
+비주얼 스튜디오를 사용해서 COM 객체를 프로젝트 참조에 추가하면 IDE가 자동으로 tlbomp.exe를 호출해서 RCW를 만들어줍니다.
 
-덕 타이핑의 단점:
-컴파일 시점에 타입 검사를 수행하지 않으므로, 런타임 오류가 발생할 가능성이 높습니다.
-코드의 가독성을 떨어뜨릴 수 있습니다.
-비쥬얼 스튜디오의 '리팩터링 기능'을 이용할 수 없습니다.
-(예를 들어 Walk() 메서드의 이름을 Run()으로 고치고 싶어도, 프로그래머가 직접 Walk() 메서드를 선언한 곳과
-사용하고 있는 곳을 코드에서 찾아 수정해야 합니다. 
-인터페이스를 사용했다면 비쥬얼 스튜디오를 이용해서 단번에, 자동으로 이 일을 할 수 있습니다.)
+COM:
+COM은 COmponent Object Model의 약자로, 마이크로소프트의 소프트웨어 컴포넌트 규격을 말합니다.
+OLE, ActiveX, COM+와 같은 파생 규격들이 모두 COM을 바탕으로 만들어졌습니다.
  */
 
 
-// 동적 타입(dynamic)을 사용하여 덕 타이핑(duck typing)을 구현
-namespace DuckTyping
+// COM 인터페이스를 사용하여 Excel 파일을 생성하는 두 가지 방법
+namespace COMInterop
 {
-    class Duck // Walk, Swim, Quack 메서드를 가진 클래스입니다.
-    {
-        public void Walk()
-        { Console.WriteLine(this.GetType() + ".Walk"); }
-
-        public void Swim()
-        { Console.WriteLine(this.GetType() + ".Swim"); }
-
-        public void Quack()
-        { Console.WriteLine(this.GetType() + ".Quack"); }
-    }
-
-
-    class Mallard : Duck // Duck 클래스를 상속받는 클래스입니다.
-    { }
-
-
-    class Robot // Walk, Swim, Quack 메서드를 가진 클래스입니다.
-                // Duck 클래스와는 상속 관계가 없습니다.
-    {
-        public void Walk()
-        { Console.WriteLine("Robot.Walk"); }
-
-        public void Swim()
-        { Console.WriteLine("Robot.Swim"); }
-
-        public void Quack()
-        { Console.WriteLine("Robot.Quack"); }
-    }
-
-
     class MainApp
     {
+        public static void OldWay(string[,] data, string savePath) // OldWay 메서드 정의
+
+        {
+            Excel.Application excelApp = new Excel.Application(); // Excel Application 객체 생성
+
+            excelApp.Workbooks.Add(Type.Missing); // 새 워크북 추가, Type.Missing은 선택적 인수를 생략할 때 사용
+
+            Excel.Worksheet workSheet = (Excel.Worksheet)excelApp.ActiveSheet; // 활성 시트를 Worksheet 객체로 가져오기
+
+            for (int i = 0; i < data.GetLength(0); i++) // 데이터 배열의 행 개수만큼 반복
+            {
+                ((Excel.Range)workSheet.Cells[i + 1, 1]).Value2 = data[i, 0]; // 엑셀 셀에 값 할당
+                ((Excel.Range)workSheet.Cells[i + 1, 2]).Value2 = data[i, 1]; // 엑셀 셀에 값 할당
+            }
+
+            workSheet.SaveAs(savePath + "\\shpark-book-old.xlsx", // 엑셀 파일 저장
+                Type.Missing, // 파일 형식 지정 (생략)
+                Type.Missing, // 암호 지정 (생략)
+                Type.Missing, // 쓰기 보호 암호 지정 (생략)
+                Type.Missing, // 읽기 전용으로 저장할지 여부 지정 (생략)
+                Type.Missing, // 파일 형식에 대한 추가 정보 지정 (생략)
+                Type.Missing, // 파일을 저장할 때 충돌을 처리하는 방법 지정 (생략)
+                Type.Missing, // 파일을 저장할 때 파일 속성을 설정하는 방법 지정 (생략)
+                Type.Missing); // 파일을 저장할 때 파일 속성을 설정하는 방법 지정 (생략)
+
+            excelApp.Quit(); // 엑셀 종료
+        }
+
+        public static void NewWay(string[,] data, string savePath) // NewWay 메서드 정의
+        {
+            Excel.Application excelApp = new Excel.Application(); // Excel Application 객체 생성
+
+            excelApp.Workbooks.Add(); // 새 워크북 추가
+
+            Excel._Worksheet workSheet = (Excel._Worksheet)excelApp.ActiveSheet; // 활성 시트를 _Worksheet 객체로 가져오기
+
+            for (int i = 0; i < data.GetLength(0); i++) // 데이터 배열의 행 개수만큼 반복
+            {
+                workSheet.Cells[i + 1, 1] = data[i, 0]; // 엑셀 셀에 값 할당
+                workSheet.Cells[i + 1, 2] = data[i, 1]; // 엑셀 셀에 값 할당
+            }
+
+            workSheet.SaveAs(savePath + "\\shpark-book-dynamic.xlsx"); // 엑셀 파일 저장
+            excelApp.Quit(); // 엑셀 종료
+        }
+
         static void Main(string[] args)
         {
-            dynamic[] arr = new dynamic[] { new Duck(), new Mallard(), new Robot() };
-            // dynamic 타입의 배열 arr을 선언하고, Duck, Mallard, Robot 객체를 요소로 추가합니다.
-            // dynamic 타입은 런타임에 타입 검사를 수행하므로, 컴파일 시점에 객체의 타입을 알 필요가 없습니다.
-            // 만약, Duck[] arr = new Duck[] { new Duck(), new Mallard(), new Robot() }; 라고 했다면,
-            // C# 컴파일러는 Robot은 오리로 인정하지 않기 때문에,
-            // 컴파일러는 Robot은 Duck 형식이 아니라고 에러 메시지를 보여줍니다.
-            // 즉, 오리처럼 걷고 헤엄치고 꽉꽉거리더라도 컴파일러는 그렇게 생각하지 않습니다.
-            // 이런 문제를 dynamic 형식으로 선언하여 해결한 것입니다.
-            // dynamic 형식으로 선언하면, 형식 검사를 실행할 때로 미루기 때문입니다.
-
-            foreach (dynamic duck in arr) // arr 배열의 각 요소를 duck 변수에 할당하며 반복합니다.
+            string savePath = System.IO.Directory.GetCurrentDirectory(); // 현재 디렉토리 경로 가져오기
+            string[,] array = new string[,] // 문자열 2차원 배열 선언 및 초기화
             {
-                Console.WriteLine(duck.GetType()); // duck 객체의 타입을 출력합니다.
+                { "뇌를 자극하는 알고리즘",       "2009" },
+                { "뇌를 자극하는 C# 4.0",         "2011" },
+                { "뇌를 자극하는 C# 5.0",         "2013" },
+                { "뇌를 자극하는 파이썬 3",       "2016" },
+                { "그로킹 딥러닝",                "2019" },
+                { "이것이 C#이다",                "2018" },
+                { "이것이 C#이다 2E",             "2020" },
+                { "이것이 자료구조+알고리즘이다", "2022" },
+                { "이것이 C#이다 3E",             "2023" },
+            };
 
-                // duck 객체의 Walk, Swim, Quack 메서드를 호출합니다.
-                // 덕 타이핑을 사용하면 duck 객체의 실제 타입에 관계없이 동일한 방식으로 메서드를 호출할 수 있습니다.
-                duck.Walk();
-                duck.Swim();
-                duck.Quack();
+            Console.WriteLine("Creating Excel document in old way...");
+            OldWay(array, savePath); // OldWay 메서드 호출
 
-                Console.WriteLine();
-            }
+            Console.WriteLine("Creating Excel document in new way...");
+            NewWay(array, savePath); // NewWay 메서드 호출
         }
     }
 }
-
-
-/*
-출력 결과
-
-DuckTyping.Duck
-DuckTyping.Duck.Walk
-DuckTyping.Duck.Swim
-DuckTyping.Duck.Quack
-
-DuckTyping.Mallard
-DuckTyping.Mallard.Walk
-DuckTyping.Mallard.Swim
-DuckTyping.Mallard.Quack
-
-DuckTyping.Robot
-Robot.Walk
-Robot.Swim
-Robot.Quack
- */
