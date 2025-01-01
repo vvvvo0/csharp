@@ -3,66 +3,51 @@ using System.IO; // 파일 입출력을 위한 네임스페이스
 
 
 /*
-BinaryWriter 클래스, BinaryReader 클래스:
-BinaryWriter 클래스는 스트림에 이진 데이터(Binary Data)를 기록하기 위한 목적으로,
-그리고 BinaryReader 클래스는 스트림으로부터 이진 데이터를 읽어들이기 위한 목적으로 만들어진 클래스입니다.
+.NET은 텍스트 파일을 쓰고 읽을 수 있도록 StreamWriter/StreamReader 클래스를 제공합니다.
 
-
-BinaryWriter 클래스, BinaryReader 클래스 나온 배경?
-FileStream 클래스는 파일 처리를 위한 모든 것을 갖고 있지만,
-데이터를 저장할 때, 반드시 byte 형식 또는 byte의 배열 형식으로 변환해야 한다는 번거로움이 있습니다.
-따라서 .NET은 이런 불편함을 해소하기 위해 이 두 클래스를 만든 것입니다.
-
-
-BinaryWriter와 BinaryReader 클래스는 결국 파일 처리의 도우미 역할을 할 뿐이기 때문에,
-이 클래스들을 이용하려면 Stream으로부터 파생된 클래스의 인스턴스가 있어야 합니다.
-(예를 들어 BinaryWriter와 FileStream을 함께 사용하면 
-BinaryWriter의 이진 데이터 쓰기 기능을 파일 기록에 사용할 수 있고,
-NetworkStream과 함꼐 사용한다면 네트워크로 이진 데이터를 내보낼 수 있습니다.)
+바이너리 파일을 쓰고 읽을 수 있도록 BinaryWriter/BinaryReader 클래스를 제공한 것과 같음.
  */
 
 
-// BinaryWriter와 BinaryReader를 사용하여 다양한 데이터 타입의 값을 파일에 쓰고 읽는 프로그램
-namespace BinaryFile
+// StreamWriter/StreamReader 클래스를 사용하여,
+// 다양한 데이터 타입의 값을 텍스트 파일("a.txt")에 쓰고 읽는 프로그램
+namespace TextFile
 {
     class MainApp
     {
         static void Main(string[] args)
         {
-            using (BinaryWriter bw = new BinaryWriter(new FileStream("a.dat", FileMode.Create)))
-            // "a.dat" 파일을 생성하고, BinaryWriter 객체 bw를 사용하여 파일에 쓸 수 있도록 합니다. 
-            // using 문을 사용하였으므로, bw 객체를 사용한 후 자동으로 Close() 메서드가 호출되어 파일이 닫힙니다.
+            using (StreamWriter sw = 
+                new StreamWriter( // FileStream 객체를 사용하여 StreamWriter 객체를 생성합니다.
+                                  // StreamWriter는 FileStream을 통해 파일에 접근하고 데이터를 씁니다.
+                    new FileStream("a.txt", FileMode.Create))) // "a.txt"라는 텍스트 파일을 생성하고,
+                                                               // 쓰기 모드로 여는 FileStream 객체(스트림)를 생성합니다.
+                                                               // 이 객체는 StreamReader 객체에 전달되어,
+                                                               // StreamReader가 파일에 텍스트를 쓸 수 있도록 합니다.
+                                                               // 만약 파일이 이미 존재하면 기존 내용을 덮어씁니다.
             {
-                bw.Write(int.MaxValue); // int 타입의 최댓값을 파일에 씀
-                bw.Write("Good morning!"); // 문자열 "Good morning!"을 파일에 씀
-                bw.Write(uint.MaxValue); // uint 타입의 최댓값을 파일에 씀
-                bw.Write("안녕하세요!"); // 문자열 "안녕하세요!"를 파일에 씀
-                bw.Write(double.MaxValue); // double 타입의 최댓값을 파일에 씀
-            } // using 블록 종료 시 bw.Close() 자동 호출
-              // bw 스트림은 여기서 한 번 닫힙니다,
-              // 이렇게 닫지 않고 이후에 같은 스타일의 using 선언을 이용했다면,
-              // a.dat가 열려 있는 상태에서 같은 파일을 다시 열려고 하는 상황이 발생합니다.
+               // Write() 메서드와 WriteLine() 메서드는 C#이 제공하는 모든 기본 데이터 형식에 대해 오버로딩되어 있습니다.
+                sw.WriteLine(int.MaxValue); // int 최댓값을 파일에 씀
+                sw.WriteLine("Good morning!"); // 문자열 "Good morning!"을 파일에 씀
+                sw.WriteLine(uint.MaxValue); // uint 최댓값을 파일에 씀
+                sw.WriteLine("안녕하세요!"); // 문자열 "안녕하세요!"를 파일에 씀
+                sw.WriteLine(double.MaxValue); // double 최댓값을 파일에 씀
+            } // using 블록 종료 시 sw.Close() 자동 호출
 
 
-            using BinaryReader br = new BinaryReader(new FileStream("a.dat", FileMode.Open));
-            // "a.dat" 파일을 열고, BinaryReader로 연결
-            // 1. `new FileStream("a.dat", FileMode.Open)`: "a.dat" 파일을 읽기 모드(`FileMode.Open`)로 엽니다.
-            // `FileStream`은 파일을 읽고 쓰기 위한 스트림을 나타냅니다.
-            // 즉, 파일과 프로그램 사이에 데이터가 흐를 수 있는 통로를 만드는 것이죠.
-            // 2. `new BinaryReader(...)`: `BinaryReader` 객체를 생성합니다.
-            // `BinaryReader`는 파일 스트림에서 데이터를 읽어오는 데 사용되는 클래스입니다. 
-            // 3. `BinaryReader br = ...`: 생성된 `BinaryReader` 객체를 `br`이라는 변수에 저장합니다.
-            // 이제 `br` 변수를 사용하여 파일에서 데이터를 읽어올 수 있습니다.
-            // 4. `using`: `using` 문은 `BinaryReader` 객체를 사용한 후 자동으로 `Close()` 메서드를 호출하여 파일을 닫습니다.
-            // 이는 파일을 안전하게 닫고 리소스를 해제하는 데 중요합니다.
+            using (StreamReader sr =
+                new StreamReader( 
+                    new FileStream("a.txt", FileMode.Open))) // "a.txt" 파일을 열고 StreamReader 객체 sr를 사용하여 파일에서 읽을 수 있도록 합니다.
+                                                             // using 문을 사용하면 sr 객체를 사용한 후 자동으로 Close() 메서드가 호출되어 파일이 닫힙니다.
+            {
+                Console.WriteLine($"File size : {sr.BaseStream.Length} bytes");  // 파일 크기 출력
 
-            Console.WriteLine($"File size : {br.BaseStream.Length} bytes"); // 파일 크기 출력
-            Console.WriteLine($"{br.ReadInt32()}"); // 파일에서 int 값 읽어서 출력
-            Console.WriteLine($"{br.ReadString()}"); // 파일에서 문자열 읽어서 출력
-            Console.WriteLine($"{br.ReadUInt32()}"); // 파일에서 uint 값 읽어서 출력
-            Console.WriteLine($"{br.ReadString()}"); // 파일에서 문자열 읽어서 출력
-            Console.WriteLine($"{br.ReadDouble()}"); // 파일에서 double 값 읽어서 출력
-        } // using 블록 종료 시 br.Close() 자동 호출
+                while (sr.EndOfStream == false) // 파일의 끝에 도달할 때까지 반복
+                {
+                    Console.WriteLine(sr.ReadLine()); // 파일에서 한 줄씩 읽어서 출력
+                }
+            } // using 블록 종료 시 sr.Close() 자동 호출
+        }
     }
 }
 
@@ -70,10 +55,10 @@ namespace BinaryFile
 /*
 출력 결과
 
-File size : 47 bytes
+File size : 82 bytes
 2147483647
 Good morning!
 4294967295
 안녕하세요!
 1.7976931348623157E+308
-*/
+ */
