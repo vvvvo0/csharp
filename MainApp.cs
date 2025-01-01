@@ -1,87 +1,87 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-
-using Microsoft.Scripting; // 동적 언어 런타임(DLR)을 위한 네임스페이스
-using Microsoft.Scripting.Hosting; // DLR 호스팅 API를 위한 네임스페이스
-using IronPython.Hosting; // IronPython을 사용하기 위한 네임스페이스
+using System.IO; // 파일 및 디렉터리 작업을 위한 네임스페이스
 
 
 /*
-DLR(Dynamic Language Runtime):
-CLR 위에서 동작하며, 파이썬이나 루비 같은 동적 언어를 .NET 플랫폼에서 실행할 수 있습니다.
-파이썬이나 루비 같은 동적 언어의 코드에서 만들어진 객체에,
-C#이나 VB 같은 정적 언어의 코드에서 접근할 수 있게 해줍니다.
-(즉, C# 코드에서 직접 파이썬이나 루비 코드를 실행하고 결과를 받아볼 수 있습니다.)
-DLR API를 기반으로 구현된 동적 언어라도 호스팅(Hosting) 할 수 있습니다.
-(즉, 파이썬을 쭉 사용하다가 파이썬에는 없는 라이브러리가 루비에 있는 경우,
-바로 루비 라이브러리를 이용하는 코드를 호스팅할 수 있습니다.)
+파일 정보, 디렉터리 정보 다루는 방법.
 
+파일(File): 
+컴퓨터 저장 매체에 기록되는 데이터의 묶음.
 
-dynamic 형식:
-COM과 .NET의 상호 운영성 문제에 사용했던 dynamic을, 
-CLR과 DLR 사이의 상호 운용성 문제를 해결하는 데 사용할 수 있습니다.
-왜냐하면 미리 형식 검사를 할 수 없는 동적 형식 언어에서 만들어진 객체를,
-C#의 dynamic 형식이 받아낼 수 있기 때문입니다.
+디렉터리(Directory): 
+파일이 위치하는 주소. 파일을 담는다는 의미에서 폴더(Folder)라고 부르기도 함.
 
+.NET은 파일과 디렉터리 정보를 다룰 수 있도록 'System.IO 네임스페이스' 아래에 다음과 같은 클래스들을 제공함:
+(1) File :'파일'의 생성, 복사, 삭제, 이동, 조회를 처리하는 '정적 메소드'를 제공함
+(2) FileInfo: File 클래스와 하는 일은 동일하지만, 정적 메서드 대신 '인스턴스 메서드'를 제공함
+(3) Directory: '디렉터리'의 생성, 삭제, 이동, 조회를 처리하는 '정적 메서드'를 제공함 
+(4) DirectoryInfo: Directoty 클래스와 하는 일은 동일하지만, 정적 메서드 대신 '인스턴스 메서드'를 제공함
 
-DLR 나온 배경:
-CLR(Common Language Runtime)은 IL(Intermediate Language)로 컴파일할 수 있는 언어들은 지원하지만,
-동적 언어(Python, Ruby처럼 실행할 때 코드를 해석해서 실행하는 방식의 언어)는 지원할 수 없었습니다.
-그래서 마이크로소프트는 동적 언어를 실행할 수 있도록 하는 플랫폼인 DLR(Dynamic Language Runtime)을 선보였습니다.
-
-
-DLR이 제공하는 클래스들:
-(1) ScriptRuntime
-(2) ScriptScope
-(3) ScriptEngine
-(4) ScriptSource
-(5) CompiledCode
+File 클래스 vs FileInfo 클래스?
+하나의 파일에 대해 한 두가지 정도의 작업을 할 때는 File 클래스의 정적 메서드를 이용하고,
+하나의 파일에 여러가지 작업을 할 때는 FileInfo 클래스의 인스턴스 메서드를 이용하는 편임
+Directory 클래스와 DirectoryInfo 클래스도 동일.
  */
 
 
-// IronPython 엔진(별도로 설치해야 함)을 사용하여 Python 코드를 C#에서 실행
-namespace WithPython
+// 사용자가 인수를 입력하지 않으면 현재 디렉터리에 대해,
+// 인수를 입력한 경우에는 입력한 디렉터리 경로에 대해
+// 하위 디렉터리 목록과 파일 목록을 차례대로 출력하는 프로그램
+// (System.IO 네임스페이스의 클래스들을 사용하여 특정 디렉터리의 하위 디렉터리와 파일 정보를 출력하는 프로그램)
+namespace Dir
 {
     class MainApp
     {
         static void Main(string[] args)
         {
-            ScriptEngine engine = Python.CreateEngine(); // IronPython 엔진 생성
-            ScriptScope scope = engine.CreateScope(); // Python 코드 실행을 위한 스코프 생성
-            scope.SetVariable("n", "박상현"); // 스코프에 변수 n을 "박상현"으로 설정
-            scope.SetVariable("p", "010-123-4566"); // 스코프에 변수 p를 "010-123-4566"으로 설정
+            string directory; // 디렉터리 경로를 저장할 변수
+            if (args.Length < 1) // 명령줄 인수가 없으면(사용자가 인수를 입력하지 않은 경우)
+                directory = "."; // 현재 디렉터리(.)를 사용
+            else
+                directory = args[0]; // 명령줄 인수가 있으면(사용자가 인수를 입력한 경우)
+                                     // 명령줄 인수를 디렉터리 경로로 사용
 
-            ScriptSource source = engine.CreateScriptSourceFromString( // Python 코드를 문자열로부터 생성
-                @"
-class NameCard : // NameCard 클래스 정의
-    name = '' // name 필드 초기화
-    phone = '' // phone 필드 초기화
+            Console.WriteLine($"{directory} directory Info"); // 디렉터리 정보 출력
 
-    def __init__(self, name, phone) :  // 생성자
-        self.name = name  // name 필드에 매개변수 name 값 할당
-        self.phone = phone // phone 필드에 매개변수 phone 값 할당
+            Console.WriteLine("- Directories :"); // 하위 디렉터리 목록 출력
+            
+            var directories = (from dir in Directory.GetDirectories(directory) 
+                               let info = new DirectoryInfo(dir)
+                               select new
+                               {
+                                   Name = info.Name,
+                                   Attributes = info.Attributes
+                               }).ToList();
+            // Directory.GetDirectories() 메서드를 사용하여 directory 경로의 하위 디렉터리 목록을 가져옵니다.
+            // 각 하위 디렉터리에 대해 DirectoryInfo 객체를 생성하고,
+            // 익명 형식을 사용하여 Name과 Attributes 프로퍼티를 선택합니다.
+            // ToList() 메서드를 사용하여 쿼리 결과를 List<T>로 변환합니다.
 
-    def printNameCard(self) : // 이름과 전화번호를 출력하는 메서드
-        print self.name + ', ' + self.phone  // name과 phone 필드 값 출력
 
-NameCard(n, p) // NameCard 객체 생성
-");
-            dynamic result = source.Execute(scope); // Python 코드 실행하고,
-                                                    // 결과를 result 변수에 저장합니다.
-                                                    // dynamic 키워드는 런타임에 타입 검사를 수행합니다.
-            result.printNameCard(); // result 객체의 printNameCard 메서드 호출
+            foreach (var d in directories) // 각 하위 디렉터리의 이름과 속성을 출력합니다.
+                Console.WriteLine($"{d.Name} : {d.Attributes}");
 
-            Console.WriteLine("{0}, {1}", result.name, result.phone); // result 객체의 name과 phone 필드 값 출력
+
+            Console.WriteLine("- Files :"); // 파일 목록 출력
+
+            var files = (from file in Directory.GetFiles(directory)
+                         let info = new FileInfo(file)
+                         select new
+                         {
+                             Name = info.Name,
+                             FileSize = info.Length,
+                             Attributes = info.Attributes
+                         }).ToList();
+            // Directory.GetFiles() 메서드를 사용하여 directory 경로의 파일 목록을 가져옵니다.
+            // 각 파일에 대해 FileInfo 객체를 생성하고,
+            // 익명 형식을 사용하여 Name, FileSize, Attributes 프로퍼티를 선택합니다.
+            // ToList() 메서드를 사용하여 쿼리 결과를 List<T>로 변환합니다.
+
+
+            foreach (var f in files) // 각 파일의 이름, 크기, 속성을 출력합니다.
+                Console.WriteLine(
+                    $"{f.Name} : {f.FileSize}, {f.Attributes}");
         }
     }
 }
-
-
-/*
-출력 결과
-
-박상현, 010-123-4566
-박상현, 010-123-4566
- */
