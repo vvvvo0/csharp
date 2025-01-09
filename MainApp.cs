@@ -1,45 +1,65 @@
 ﻿using System;
-using System.Threading; // 스레드 사용을 위한 네임스페이스
+using System.Security.Permissions;
+using System.Threading;
 
-namespace UsingThreadState
+namespace InterruptingThread
 {
-    class MainApp
+    class SideTask
     {
-        private static void PrintThreadState(ThreadState state) // ThreadState 값과 해당하는 정수 값을 출력하는 메서드
+        int count;
+
+        public SideTask(int count)
         {
-            Console.WriteLine("{0,-16} : {1}", state, (int)state);
+            this.count = count;
         }
 
+        public void KeepAlive()
+        {
+            try
+            {
+                Console.WriteLine("Running thread isn't gonna be interrupted");
+                Thread.Sleep(100);
+
+                while (count > 0)
+                {
+                    Console.WriteLine($"{count--} left");
+
+                    Console.WriteLine("Entering into WaitJoinSleep State...");
+                    Thread.Sleep(10);
+                }
+                Console.WriteLine("Count : 0");
+            }
+            catch (ThreadInterruptedException e)
+            {
+                Console.WriteLine(e);
+            }
+            finally
+            {
+                Console.WriteLine("Clearing resource...");
+            }
+        }
+    }
+
+    class MainApp
+    {
         static void Main(string[] args)
         {
-            PrintThreadState(ThreadState.Running); // Running 상태 출력
-            PrintThreadState(ThreadState.StopRequested); // StopRequested 상태 출력
-            PrintThreadState(ThreadState.SuspendRequested); // SuspendRequested 상태 출력
-            PrintThreadState(ThreadState.Background); // Background 상태 출력
-            PrintThreadState(ThreadState.Unstarted); // Unstarted 상태 출력
-            PrintThreadState(ThreadState.Stopped); // Stopped 상태 출력
-            PrintThreadState(ThreadState.WaitSleepJoin); // WaitSleepJoin 상태 출력
-            PrintThreadState(ThreadState.Suspended); // Suspended 상태 출력
-            PrintThreadState(ThreadState.AbortRequested); // AbortRequested 상태 출력
-            PrintThreadState(ThreadState.Aborted); // Aborted 상태 출력
-            PrintThreadState(ThreadState.Aborted | ThreadState.Stopped); // Aborted | Stopped 상태 출력
+            SideTask task = new SideTask(100);
+            Thread t1 = new Thread(new ThreadStart(task.KeepAlive));
+            t1.IsBackground = false;
+
+            Console.WriteLine("Starting thread...");
+            t1.Start();
+
+            Thread.Sleep(100);
+
+            Console.WriteLine("Interrupting thread...");
+            t1.Interrupt();
+
+            Console.WriteLine("Wating until thread stops...");
+            t1.Join();
+
+            Console.WriteLine("Finished");
         }
     }
 }
-
-/*
-출력 결과
-
-Running          : 0
-StopRequested    : 1
-SuspendRequested : 2
-Background       : 4
-Unstarted        : 8
-Stopped          : 16
-WaitSleepJoin    : 32
-Suspended        : 64
-AbortRequested   : 128
-Aborted          : 256
-Stopped, Aborted : 272
- */
-// ThreadState의 요소값이 2의 제곱으로 증가하는 모습을 보임.
